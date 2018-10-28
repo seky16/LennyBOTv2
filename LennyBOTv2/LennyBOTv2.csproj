@@ -5,4 +5,29 @@
     <TargetFramework>netcoreapp2.1</TargetFramework>
   </PropertyGroup>
 
+  <ItemGroup>
+    <PackageReference Include="Discord.Addons.Interactive" Version="1.0.1" />
+    <PackageReference Include="Discord.Net" Version="2.0.0-beta2-01018" />
+    <PackageReference Include="Discord.Net.Commands" Version="2.0.0-beta2-01018" />
+    <PackageReference Include="Discord.Net.Core" Version="2.0.0-beta2-01018" />
+    <PackageReference Include="Discord.Net.Rest" Version="2.0.0-beta2-01018" />
+    <PackageReference Include="Discord.Net.Rpc" Version="2.0.0-beta-00860" />
+    <PackageReference Include="Discord.Net.Webhook" Version="2.0.0-beta2-01018" />
+    <PackageReference Include="Discord.Net.WebSocket" Version="2.0.0-beta2-01018" />
+    <PackageReference Include="Microsoft.Extensions.Configuration" Version="2.2.0-preview3-35497" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.FileExtensions" Version="2.2.0-preview3-35497" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="2.2.0-preview3-35497" />
+    <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
+    <PackageReference Include="NodaTime" Version="2.4.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="Files\config.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Files\testConfig.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>
