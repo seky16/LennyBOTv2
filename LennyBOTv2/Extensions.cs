@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
 using Discord;
 using LennyBOTv2.Services;
+using Microsoft.Extensions.DependencyInjection;
 using NodaTime;
 
 namespace LennyBOTv2
@@ -26,14 +28,20 @@ namespace LennyBOTv2
             return msg;
         }
 
-        public static IMessage ModifyAfter(this IUserMessage msg, string message, int seconds)
+        public static async Task<IMessage> GetLastMessageAsync(this ITextChannel channel)
+            => (await channel.GetMessagesAsync(1).FlattenAsync()).FirstOrDefault();
+
+        public static string GetNickname(this IUser user)
+            => (user as IGuildUser)?.Nickname ?? user.Username ?? "";
+
+        public static IMessage ModifyAfter(this IUserMessage msg, int seconds, string newContent)
         {
             Task.Run(async () =>
             {
                 await Task.Delay(seconds * 1000);
                 try
                 {
-                    await msg.ModifyAsync(x => x.Content = message);
+                    await msg.ModifyAsync(x => x.Content = newContent);
                 }
                 catch (Exception ex)
                 {
@@ -43,28 +51,24 @@ namespace LennyBOTv2
             return msg;
         }
 
-        public static async Task<IMessage> GetLastMessageAsync(this ITextChannel channel)
-            => (await channel.GetMessagesAsync(1).FlattenAsync()).FirstOrDefault();
-
+        // todo: rewrite?
         public static string ToPragueTimeString(this DateTime dateTime)
         {
             var utcDateTime = dateTime.ToUniversalTime();
             var instant = Instant.FromDateTimeUtc(utcDateTime);
             var zone = DateTimeZoneProviders.Tzdb["Europe/Prague"];
             var date = new ZonedDateTime(instant, zone);
-            return $"{date.Day}.{date.Month}.{date.Year} {date.Hour:D2}:{date.Minute:D2}:{date.Second:D2}";
+            return $"{date.Day:D2}.{date.Month:D2}.{date.Year:D4} {date.Hour:D2}:{date.Minute:D2}:{date.Second:D2}";
         }
 
+        // todo: rewrite?
         public static string ToPragueTimeString(this DateTimeOffset dateTimeOffset)
         {
             var utcDateTime = dateTimeOffset.UtcDateTime;
             var instant = Instant.FromDateTimeUtc(utcDateTime);
             var zone = DateTimeZoneProviders.Tzdb["Europe/Prague"];
             var date = new ZonedDateTime(instant, zone);
-            return $"{date.Day}.{date.Month}.{date.Year} {date.Hour:D2}:{date.Minute:D2}:{date.Second:D2}";
+            return $"{date.Day:D2}.{date.Month:D2}.{date.Year:D4} {date.Hour:D2}:{date.Minute:D2}:{date.Second:D2}";
         }
-
-        public static string GetNickname(this IUser user)
-            => (user as IGuildUser)?.Nickname ?? user.Username;
     }
 }

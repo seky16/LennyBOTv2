@@ -1,13 +1,21 @@
 ﻿using System.Text;
 using System.Threading.Tasks;
 using Discord.Commands;
+using LennyBOTv2.Services;
 
 namespace LennyBOTv2.Modules
 {
     public class GeneralModule : LennyModuleBase
     {
+        [Command("decide")]
+        public async Task DecideCmdAsync(params string[] args)
+        {
+            var r = LennyServiceProvider.Instance.Rng.Next(0, args.Length);
+            await this.ReplyAsync(args[r]);
+        }
+
         [Command("emojify")]
-        public Task EmojifyAsync([Remainder] string text)
+        public async Task EmojifyAsync([Remainder] string text)
         {
             var stringBuilder = new StringBuilder();
             foreach (var ch in text.ToLowerInvariant())
@@ -108,8 +116,8 @@ namespace LennyBOTv2.Modules
                         break;
                 }
             }
-            this.ReplyAsync(stringBuilder.ToString());
-            return this.Context.Message.DeleteAsync();
+            await this.ReplyAsync(stringBuilder.ToString());
+            await this.Context.Message.DeleteAsync();
         }
     }
 }

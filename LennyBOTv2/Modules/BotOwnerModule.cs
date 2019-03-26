@@ -4,6 +4,7 @@ using Discord;
 using Discord.Commands;
 using LennyBOTv2.Preconditions;
 using Microsoft.Extensions.Configuration;
+using Discord.Addons.Interactive;
 
 namespace LennyBOTv2.Modules
 {
@@ -16,10 +17,10 @@ namespace LennyBOTv2.Modules
             _config = config;
         }
 
-        [Command("say"), Alias("s")]
+        [Command("botnick")]
         [IsBotOwner]
-        public Task SayCmdAsync([Remainder]string text)
-            => this.ReplyAsync(text);
+        public async Task BotNickCmdAsync([Remainder]string name)
+            => await Context?.Guild?.CurrentUser?.ModifyAsync(x => x.Nickname = name);
 
         [Command("exit", RunMode = RunMode.Async)]
         [IsBotOwner]
@@ -30,6 +31,11 @@ namespace LennyBOTv2.Modules
             await this.Context.Client.StopAsync();
             Environment.Exit(0);
         }
+
+        [Command("playing")]
+        [IsBotOwner]
+        public Task PlayingCmdAsync([Remainder]string game)
+            => Context?.Client?.SetGameAsync(game);
 
         [Command("restart", RunMode = RunMode.Async)]
         [IsBotOwner]
@@ -43,14 +49,9 @@ namespace LennyBOTv2.Modules
             await msg.ModifyAsync(m => m.Content = "Restarted :white_check_mark:");
         }
 
-        [Command("botnick")]
+        [Command("say"), Alias("s")]
         [IsBotOwner]
-        public async Task BotNickCmdAsync([Remainder]string name)
-            => await Context?.Guild?.CurrentUser?.ModifyAsync(x => x.Nickname = name);
-
-        [Command("playing")]
-        [IsBotOwner]
-        public Task PlayingCmdAsync([Remainder]string game)
-            => Context?.Client?.SetGameAsync(game);
+        public Task SayCmdAsync([Remainder]string text)
+            => this.ReplyAsync(text);
     }
 }

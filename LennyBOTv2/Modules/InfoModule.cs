@@ -1,48 +1,94 @@
 ﻿using System;
 using System.Diagnostics;
-using System.Linq;
-using System.Runtime.InteropServices;
+using System.Text;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
+using LennyBOTv2.Services;
+using Microsoft.Extensions.Configuration;
 
 namespace LennyBOTv2.Modules
 {
     public class InfoModule : LennyModuleBase
     {
-        [Command("info")]
-        [Alias("about", "stats")]
-        public async Task InfoCmdAsync()
+        public InfoModule(CommandService commandService, IConfiguration config)
         {
-            var app = await this.Context.Client.GetApplicationInfoAsync();
+            this.CommandService = commandService;
+            this.Config = config;
+            this.Watch = Stopwatch.StartNew();
+        }
 
-            await this.ReplyAsync(
-                $"{Format.Bold("Info")}\n"
-                + $"- Author: {app.Owner} ({app.Owner.Id})\n"
-                + $"- Library: Discord.Net ({DiscordConfig.Version})\n"
-                + $"- Runtime: {RuntimeInformation.FrameworkDescription} {RuntimeInformation.ProcessArchitecture} "
-                + $"({RuntimeInformation.OSDescription} {RuntimeInformation.OSArchitecture})\n"
-                + $"- Uptime: {GetUptime()}\n\n"
+        public CommandService CommandService { get; }
+        public IConfiguration Config { get; }
+        public Stopwatch Watch { get; }
 
-                + $"{Format.Bold("Stats")}\n"
-                + $"- Heap Size: {GetHeapSize()}MiB\n"
-                + $"- Guilds: {this.Context.Client.Guilds.Count}\n"
-                + $"- Channels: {this.Context.Client.Guilds.Sum(g => g.Channels.Count)}\n"
-                + $"- Users: {this.Context.Client.Guilds.Sum(g => g.Users.Count)}\n")
-                ;
+        /*[Command("info")]
+[Alias("about", "stats")]
+public async Task InfoCmdAsync()
+{
+var app = await this.Context.Client.GetApplicationInfoAsync();
+
+await this.ReplyAsync(
+$"{Format.Bold("Info")}\n"
++ $"- Author: {app.Owner} ({app.Owner.Id})\n"
++ $"- Library: Discord.Net ({DiscordConfig.Version})\n"
++ $"- Runtime: {RuntimeInformation.FrameworkDescription} {RuntimeInformation.ProcessArchitecture} "
++ $"({RuntimeInformation.OSDescription} {RuntimeInformation.OSArchitecture})\n"
++ $"- Uptime: {GetUptime()}\n\n"
+
++ $"{Format.Bold("Stats")}\n"
++ $"- Heap Size: {GetHeapSize()}MiB\n"
++ $"- Guilds: {this.Context.Client.Guilds.Count}\n"
++ $"- Channels: {this.Context.Client.Guilds.Sum(g => g.Channels.Count)}\n"
++ $"- Users: {this.Context.Client.Guilds.Sum(g => g.Users.Count)}\n")
+;
+}*/
+
+        [Command("help")]
+        public async Task HelpCmdAsync()
+        {
+            var embed = new EmbedBuilder().WithTitle(":keyboard: Available commands").WithColor(new Color(255, 255, 255));
+            var prefix = this.Config["prefix"];
+            foreach (var module in this.CommandService.Modules)
+            {
+                var sb = new StringBuilder();
+                foreach (var cmd in module.Commands)
+                {
+                    var result = await cmd.CheckPreconditionsAsync(this.Context, LennyServiceProvider.Instance.ServiceProvider);
+                    if (result.IsSuccess)
+                        sb.AppendLine($"{prefix}{cmd.Name}");
+                }
+                //todo: show botowner only in seky16 guild
+                if (!string.IsNullOrEmpty(sb.ToString()) && module.Name != "BotOwnerModule")
+                    embed.AddField(module.Name.Replace("Module", ""), sb.ToString());
+            }
+            await this.ReplyAsync(embed: embed.Build());
+        }
+
+        [Command("ping")]
+        public async Task PingCmdAsync()
+        {
+            this.Watch.Stop();
+            var execution = this.Watch.ElapsedMilliseconds;
+            var ping = this.Context.Client.Latency;
+            var embed = new EmbedBuilder()
+                .WithTitle(":ping_pong: Pong!")
+                .WithDescription($"Ping: {ping} ms\nExecution: {execution} ms")
+                .Build();
+            await ReplyAsync(embed: embed);
         }
 
         [Command("avatar")]
-        public Task UserAvatarAsync(SocketUser user = null)
+        public async Task UserAvatarAsync(SocketUser user = null)
         {
             user = user ?? this.Context.User;
             var avatar = user.GetAvatarUrl(size: 2048) ?? "This user has no avatar";
-            return this.ReplyAsync(avatar);
+            await this.ReplyAsync(avatar);
         }
 
-        private static string GetUptime() => (DateTime.Now - Process.GetCurrentProcess().StartTime).ToString(@"dd\.hh\:mm\:ss");
-
         private static string GetHeapSize() => Math.Round(GC.GetTotalMemory(true) / (1024.0 * 1024.0), 2).ToString();
+
+        private static string GetUptime() => (DateTime.Now - Process.GetCurrentProcess().StartTime).ToString(@"dd\.hh\:mm\:ss");
     }
 }

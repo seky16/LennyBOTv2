@@ -19,7 +19,7 @@ namespace LennyBOTv2.Preconditions
             var isOwner = context.User.Id.ToString() == config["owner"];
             return isOwner ?
                 Task.FromResult(PreconditionResult.FromSuccess()) :
-                Task.FromResult(PreconditionResult.FromError("You are not bot owner."));
+                Task.FromResult(PreconditionResult.FromError($"{context.User.Username} - not a bot owner."));
         }
     }
 }

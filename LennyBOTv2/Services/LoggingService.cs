@@ -21,17 +21,20 @@ namespace LennyBOTv2.Services
                     break;
 
                 case LogSeverity.Info:
-                    Console.ForegroundColor = ConsoleColor.White;
+                    Console.ForegroundColor = ConsoleColor.Blue;
                     break;
 
                 case LogSeverity.Verbose:
                 case LogSeverity.Debug:
                 default:
-                    Console.ForegroundColor = ConsoleColor.DarkGray;
+                    Console.ForegroundColor = ConsoleColor.White;
                     break;
             }
 
-            Console.WriteLine($"{DateTime.Now,-19} [{msg.Severity,8}] {msg.Source}: {msg.Message}");
+            var message = msg.Message ?? "";
+            var exception = !(msg.Exception is null) ? msg.Exception.ToString() : "";
+
+            Console.WriteLine($"{DateTime.Now,-19} [{msg.Severity,8}] {msg.Source}: {message} {exception}");
             Console.ForegroundColor = cc;
 
             return Task.CompletedTask;
@@ -39,16 +42,16 @@ namespace LennyBOTv2.Services
 
         public static Task LogCritical(string msg, string source = "") => LogAsync(new LogMessage(LogSeverity.Critical, source, msg));
 
+        public static Task LogDebug(string msg, string source = "") => LogAsync(new LogMessage(LogSeverity.Debug, source, msg));
+
         public static Task LogError(string msg, string source = "") => LogAsync(new LogMessage(LogSeverity.Error, source, msg));
 
-        public static Task LogWarning(string msg, string source = "") => LogAsync(new LogMessage(LogSeverity.Warning, source, msg));
+        public static Task LogException(Exception ex, string source = "", string msg = "") => LogAsync(new LogMessage(LogSeverity.Error, source, msg, ex));
 
         public static Task LogInfo(string msg, string source = "") => LogAsync(new LogMessage(LogSeverity.Info, source, msg));
 
         public static Task LogVerbose(string msg, string source = "") => LogAsync(new LogMessage(LogSeverity.Verbose, source, msg));
 
-        public static Task LogDebug(string msg, string source = "") => LogAsync(new LogMessage(LogSeverity.Debug, source, msg));
-
-        public static Task LogException(Exception ex, string source = "", string msg = "") => LogAsync(new LogMessage(LogSeverity.Error, source, msg, ex));
+        public static Task LogWarning(string msg, string source = "") => LogAsync(new LogMessage(LogSeverity.Warning, source, msg));
     }
 }
