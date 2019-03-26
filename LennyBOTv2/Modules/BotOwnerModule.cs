@@ -4,7 +4,6 @@ using Discord;
 using Discord.Commands;
 using LennyBOTv2.Preconditions;
 using Microsoft.Extensions.Configuration;
-using Discord.Addons.Interactive;
 
 namespace LennyBOTv2.Modules
 {

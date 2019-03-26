@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Linq;
-using System.Reflection;
 using System.Threading.Tasks;
 using Discord;
 using LennyBOTv2.Services;
-using Microsoft.Extensions.DependencyInjection;
 using NodaTime;
 
 namespace LennyBOTv2
