@@ -142,6 +142,47 @@ Awards: {item.Awards}";
             await this.PagedReplyAsync(msg, false).ConfigureAwait(false);
         }
 
+        [Command("weather")]
+        public async Task WeatherCmdAsync([Remainder]string query)
+        {
+            string jsonString = string.Empty;
+            using (var client = new HttpClient())
+            {
+                var result = await client.GetAsync(string.Format("https://api.apixu.com/v1/forecast.json?key=4cc6123614b84851a8995240190306&q={0}", query.Replace(' ', '+'))).ConfigureAwait(false);
+                if (!result.IsSuccessStatusCode)
+                {
+                    await this.MarkCmdFailedAsync($"Apixu weather API returned {result.StatusCode}").ConfigureAwait(false);
+                    return;
+                }
+
+                jsonString = await result.Content.ReadAsStringAsync().ConfigureAwait(false);
+            }
+
+            var model = JsonConvert.DeserializeObject<ApixuWeatherModel.WeatherModel>(jsonString);
+            var builder = new EmbedBuilder()
+    .WithTitle($"Weather in {model.location.name}, {model.location.country}")
+    .WithDescription($"{model.current.temp_c} °C, {model.current.condition.text}")
+    .WithThumbnailUrl($"https:{model.current.condition.icon}")
+    .WithFooter($"Last update: {model.current.last_updated}")
+    /*.WithAuthor(author => {
+        author
+            .WithName("APIXU")
+            .WithUrl("https://www.apixu.com")
+            .WithIconUrl("https://cdn.apixu.com/v4/images/logo.png");
+    })*/
+    .AddField("Details",
+    $"Feels like:{model.current.feelslike_c} °C\n" +
+    $"Cloud coverage: {model.current.cloud} %\n" +
+    $"Precipitation: {model.current.precip_mm} mm\n" +
+    $"Humidity: {model.current.humidity} %\n" +
+    $"Pressure: {model.current.pressure_mb} mBar\n" +
+    $"Wind: {model.current.wind_kph} km/h {model.current.wind_dir}");
+            await Context.Channel.SendMessageAsync(
+                null,
+                embed: builder.Build())
+                .ConfigureAwait(false);
+        }
+
         [Command("wiki")]
         public async Task WikiCmdAsync([Remainder] string query)
         {
@@ -205,7 +246,7 @@ Awards: {item.Awards}";
                 var url = $"https://www.youtube.com/watch?v={ item.Id.VideoId}";
                 if (first)
                 {
-                    sb.AppendLine(title);
+                    //sb.AppendLine(title);
                     sb.AppendLine(url);
                     first = false;
                 }
@@ -214,6 +255,7 @@ Awards: {item.Awards}";
                     sb.AppendLine(title);
                     sb.Append('<').Append(url).AppendLine(">");
                 }
+                break; // todo: dirty fix because of sean
             }
             await ReplyAsync(sb.ToString()).ConfigureAwait(false);
         }
