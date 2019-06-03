@@ -10,6 +10,7 @@ using Discord.Commands;
 using Google.Apis.YouTube.v3;
 using HtmlAgilityPack;
 using LennyBOTv2.Models;
+using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using OMDbApiNet;
@@ -19,14 +20,16 @@ namespace LennyBOTv2.Modules
     // todo: make a service?
     public class SearchModule : LennyModuleBase
     {
-        public SearchModule(AsyncOmdbClient omdb, YouTubeService youTube)
+        public SearchModule(AsyncOmdbClient omdb, YouTubeService youTube, IConfiguration config)
         {
             this.Omdb = omdb;
             this.YouTube = youTube;
+            this.Config = config;
         }
 
         public AsyncOmdbClient Omdb { get; }
         public YouTubeService YouTube { get; }
+        public IConfiguration Config { get; }
 
         [Command("amd")]
         public async Task AmdCmdAsync()
@@ -148,7 +151,7 @@ Awards: {item.Awards}";
             string jsonString = string.Empty;
             using (var client = new HttpClient())
             {
-                var result = await client.GetAsync(string.Format("https://api.apixu.com/v1/forecast.json?key=4cc6123614b84851a8995240190306&q={0}", query.Replace(' ', '+'))).ConfigureAwait(false);
+                var result = await client.GetAsync(string.Format("https://api.apixu.com/v1/forecast.json?key={1}&q={0}", query.Replace(' ', '+'), this.Config["apixuAPIkey"])).ConfigureAwait(false);
                 if (!result.IsSuccessStatusCode)
                 {
                     await this.MarkCmdFailedAsync($"Apixu weather API returned {result.StatusCode}").ConfigureAwait(false);
@@ -171,7 +174,7 @@ Awards: {item.Awards}";
             .WithIconUrl("https://cdn.apixu.com/v4/images/logo.png");
     })*/
     .AddField("Details",
-    $"Feels like:{model.current.feelslike_c} °C\n" +
+    $"Feels like: {model.current.feelslike_c} °C\n" +
     $"Cloud coverage: {model.current.cloud} %\n" +
     $"Precipitation: {model.current.precip_mm} mm\n" +
     $"Humidity: {model.current.humidity} %\n" +
