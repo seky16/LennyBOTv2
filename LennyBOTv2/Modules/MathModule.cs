@@ -18,15 +18,15 @@ namespace LennyBOTv2.Modules
 
             using (var client = new HttpClient())
             {
-                var get = await client.GetAsync(url);
+                var get = await client.GetAsync(url).ConfigureAwait(false);
                 if (!get.IsSuccessStatusCode)
                 {
-                    await this.MarkCmdFailedAsync($"math.js API returned {get.StatusCode}");
+                    await this.MarkCmdFailedAsync($"math.js API returned {get.StatusCode}").ConfigureAwait(false);
                     return;
                 }
 
-                var result = await get.Content.ReadAsStringAsync();
-                await this.ReplyAsync($"`{expression} = {result}`");
+                var result = await get.Content.ReadAsStringAsync().ConfigureAwait(false);
+                await this.ReplyAsync($"`{expression} = {result}`").ConfigureAwait(false);
             }
         }
 
@@ -36,21 +36,21 @@ namespace LennyBOTv2.Modules
             amount = amount.Replace(',', '.');
             if (!double.TryParse(amount, out var amountD))
             {
-                await MarkCmdFailedAsync($"Unable to parse {amount} to double");
+                await MarkCmdFailedAsync($"Unable to parse {amount} to double").ConfigureAwait(false);
                 return;
             }
 
-            if (to.ToLowerInvariant().StartsWith("to "))
+            if (to.StartsWith("to ", StringComparison.OrdinalIgnoreCase))
                 to = to.Substring(3);
 
-            var result = await Fixer.ConvertAsync(from, to, amountD);
+            var result = await Fixer.ConvertAsync(from, to, amountD).ConfigureAwait(false);
             result = Math.Round(result, 2);
             var builder = new EmbedBuilder()
                 .WithColor(Color.DarkGreen)
                 .WithAuthor(new EmbedAuthorBuilder().WithName(Context.User.GetNickname()).WithIconUrl(Context.User.GetAvatarUrl() ?? Context.User.GetDefaultAvatarUrl()))
                 .WithCurrentTimestamp()
                 .WithDescription($"{amountD.ToString(CultureInfo.InvariantCulture)} {from.ToUpper()} = **{result.ToString(CultureInfo.InvariantCulture)} {to.ToUpper()}**");
-            await this.ReplyAsync(string.Empty, false, builder.Build());
+            await this.ReplyAsync(string.Empty, false, builder.Build()).ConfigureAwait(false);
         }
     }
 }

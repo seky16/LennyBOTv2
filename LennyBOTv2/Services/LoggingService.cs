@@ -4,7 +4,9 @@ using Discord;
 
 namespace LennyBOTv2.Services
 {
+#pragma warning disable RCS1102 // Make class static.
     internal class LoggingService
+#pragma warning restore RCS1102 // Make class static.
     {
         public static Task LogAsync(LogMessage msg)
         {

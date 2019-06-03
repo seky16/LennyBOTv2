@@ -10,8 +10,7 @@ namespace LennyBOTv2.Preconditions
     {
         public override Task<PreconditionResult> CheckPermissionsAsync(ICommandContext context, CommandInfo command, IServiceProvider services)
         {
-            var config = services.GetRequiredService(typeof(IConfiguration)) as IConfiguration;
-            if (config is null)
+            if (!(services.GetRequiredService(typeof(IConfiguration)) is IConfiguration config))
             {
                 return Task.FromResult(PreconditionResult.FromError("Cannot load config."));
             }

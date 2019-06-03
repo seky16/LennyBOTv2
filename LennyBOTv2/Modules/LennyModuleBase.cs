@@ -10,10 +10,10 @@ namespace LennyBOTv2.Modules
     {
         public async Task MarkCmdFailedAsync(string reason = "")
         {
-            await this.Context.Message.AddReactionAsync(new Emoji("⚠"));
+            await this.Context.Message.AddReactionAsync(new Emoji("⚠")).ConfigureAwait(false);
             if (!string.IsNullOrWhiteSpace(reason))
                 reason = $" (Reason: {reason})";
-            await LoggingService.LogError($"{this.Context.User.Username} '{this.Context.Message.Content}' failed. {reason.Trim()}");
+            await LoggingService.LogError($"{this.Context.User.Username} '{this.Context.Message.Content}' failed. {reason.Trim()}").ConfigureAwait(false);
         }
     }
 }

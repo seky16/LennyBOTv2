@@ -34,7 +34,7 @@ namespace LennyBOTv2.Modules
             var doc = new HtmlWeb().Load("https://finance.yahoo.com/quote/AMD");
             var header = doc.GetElementbyId("quote-header-info");
             var info = header.LastChild.FirstChild.FirstChild.ChildNodes.Select(n => n.InnerText).ToList();
-            await ReplyAsync($"**{info[0]}$**\n{info[1]}\n{info[2]}");
+            await ReplyAsync($"**{info[0]}$**\n{info[1]}\n{info[2]}").ConfigureAwait(false);
         }
 
         [Command("imdb", RunMode = RunMode.Async)]
@@ -44,15 +44,15 @@ namespace LennyBOTv2.Modules
                 .WithName("IMDb")
                 .WithIconUrl("http://files.softicons.com/download/social-media-icons/flat-gradient-social-icons-by-guilherme-lima/png/512x512/IMDb.png")
                 .WithUrl("https://www.imdb.com/");
-            var list = await Omdb.GetSearchListAsync(query);
+            var list = await Omdb.GetSearchListAsync(query).ConfigureAwait(false);
             if (!string.IsNullOrEmpty(list.Error))
             {
-                await this.MarkCmdFailedAsync($"OMDB: {list.Error}");
+                await this.MarkCmdFailedAsync($"OMDB: {list.Error}").ConfigureAwait(false);
                 return;
             }
             if (list.SearchResults.Count == 1)
             {
-                var item = await Omdb.GetItemByIdAsync(list.SearchResults[0].ImdbId);
+                var item = await Omdb.GetItemByIdAsync(list.SearchResults[0].ImdbId).ConfigureAwait(false);
                 var embed = new EmbedBuilder()
                     .WithColor(new Color(248, 231, 28))
                     .WithCurrentTimestamp()
@@ -66,13 +66,13 @@ namespace LennyBOTv2.Modules
                     .AddField("Release dates", $"Released: {item.Released}\nDVD: {item.Dvd}", true)
                     .AddField("Trivia", $"Box office: {item.BoxOffice}\nAwards: {item.Awards}")
                     .Build();
-                await ReplyAsync(embed: embed);
+                await ReplyAsync(embed: embed).ConfigureAwait(false);
                 return;
             }
             var pages = new List<string>();
             foreach (var result in list.SearchResults)
             {
-                var item = await Omdb.GetItemByIdAsync(result.ImdbId);
+                var item = await Omdb.GetItemByIdAsync(result.ImdbId).ConfigureAwait(false);
                 var str = $@"[**{item.Title} ({item.Year})**](https://www.imdb.com/title/{ item.ImdbId})
 {item.Plot} ({item.Runtime})
 **Rating**
@@ -94,7 +94,7 @@ Awards: {item.Awards}";
             }
             var msg = new PaginatedMessage() { Title = $"Search results for *{query}*", Author = author, Color = new Color(248, 231, 28), Pages = pages };
 
-            await this.PagedReplyAsync(msg, false);
+            await this.PagedReplyAsync(msg, false).ConfigureAwait(false);
         }
 
         [Command("lmgtfy")]
@@ -107,19 +107,19 @@ Awards: {item.Awards}";
             string jsonString = string.Empty;
             using (var client = new HttpClient())
             {
-                var result = await client.GetAsync(string.Format("http://api.urbandictionary.com/v0/define?term={0}", query.Replace(' ', '+')));
+                var result = await client.GetAsync(string.Format("http://api.urbandictionary.com/v0/define?term={0}", query.Replace(' ', '+'))).ConfigureAwait(false);
                 if (!result.IsSuccessStatusCode)
                 {
-                    await this.MarkCmdFailedAsync($"UrbanDict API returned {result.StatusCode}");
+                    await this.MarkCmdFailedAsync($"UrbanDict API returned {result.StatusCode}").ConfigureAwait(false);
                     return;
                 }
 
-                jsonString = await result.Content.ReadAsStringAsync();
+                jsonString = await result.Content.ReadAsStringAsync().ConfigureAwait(false);
             }
             var urbanModel = UrbanModel.FromJson(jsonString);
             if (urbanModel?.List?.Count == 0)
             {
-                await this.ReplyAsync($"There are no definitions for word: **{query}**.");
+                await this.ReplyAsync($"There are no definitions for word: **{query}**.").ConfigureAwait(false);
                 return;
             }
 
@@ -139,7 +139,7 @@ Awards: {item.Awards}";
                 .WithUrl("https://urbandictionary.com");
             var msg = new PaginatedMessage() { Title = $"Definitions for *{query}*", Author = author, Color = new Color(255, 84, 33), Pages = pages };
 
-            await this.PagedReplyAsync(msg, false);
+            await this.PagedReplyAsync(msg, false).ConfigureAwait(false);
         }
 
         [Command("wiki")]
@@ -147,15 +147,15 @@ Awards: {item.Awards}";
         {
             using (var client = new HttpClient())
             {
-                var getResult = await client.GetAsync($"https://en.wikipedia.org/w/api.php?action=opensearch&search={ Uri.EscapeUriString(query)}");
+                var getResult = await client.GetAsync($"https://en.wikipedia.org/w/api.php?action=opensearch&search={ Uri.EscapeUriString(query)}").ConfigureAwait(false);
 
                 if (!getResult.IsSuccessStatusCode)
                 {
-                    await this.MarkCmdFailedAsync($"Wikipedia API returned {getResult.StatusCode}");
+                    await this.MarkCmdFailedAsync($"Wikipedia API returned {getResult.StatusCode}").ConfigureAwait(false);
                     return;
                 }
 
-                var getContent = await getResult.Content.ReadAsStringAsync();
+                var getContent = await getResult.Content.ReadAsStringAsync().ConfigureAwait(false);
                 JArray responseObject = JsonConvert.DeserializeObject<JArray>(getContent);
                 var titles = responseObject[1].ToObject<List<string>>();
                 var descriptions = responseObject[2].ToObject<List<string>>();
@@ -165,7 +165,7 @@ Awards: {item.Awards}";
                 for (int i = 0; i < titles.Count; i++)
                 {
                     pages.Add(new StringBuilder()
-                    .AppendLine($"[**{titles[i]}**]({urls[i]})")
+                    .Append("[**").Append(titles[i]).Append("**](").Append(urls[i]).AppendLine(")")
                     .AppendLine(descriptions[i])
                     .ToString());
                 }
@@ -176,7 +176,7 @@ Awards: {item.Awards}";
                     .WithUrl("https://en.wikipedia.org/wiki/Main_Page");
                 var msg = new PaginatedMessage() { Title = $"Search results for *{query}*", Author = author, Color = new Color(255, 255, 255), Pages = pages };
 
-                await this.PagedReplyAsync(msg, false);
+                await this.PagedReplyAsync(msg, false).ConfigureAwait(false);
             }
         }
 
@@ -189,11 +189,11 @@ Awards: {item.Awards}";
             request.SafeSearch = SearchResource.ListRequest.SafeSearchEnum.None;
             request.Type = "video";
             request.RelevanceLanguage = "en";
-            var response = await request.ExecuteAsync();
+            var response = await request.ExecuteAsync().ConfigureAwait(false);
 
             if (response.Items.Count == 0)
             {
-                await ReplyAsync("No results.");
+                await ReplyAsync("No results.").ConfigureAwait(false);
                 return;
             }
             var sb = new StringBuilder();
@@ -212,10 +212,10 @@ Awards: {item.Awards}";
                 else
                 {
                     sb.AppendLine(title);
-                    sb.AppendLine($"<{url}>");
+                    sb.Append('<').Append(url).AppendLine(">");
                 }
             }
-            await ReplyAsync(sb.ToString());
+            await ReplyAsync(sb.ToString()).ConfigureAwait(false);
         }
     }
 }

@@ -55,15 +55,15 @@ $"{Format.Bold("Info")}\n"
                 var sb = new StringBuilder();
                 foreach (var cmd in module.Commands)
                 {
-                    var result = await cmd.CheckPreconditionsAsync(this.Context, LennyServiceProvider.Instance.ServiceProvider);
+                    var result = await cmd.CheckPreconditionsAsync(this.Context, LennyServiceProvider.Instance.ServiceProvider).ConfigureAwait(false);
                     if (result.IsSuccess)
-                        sb.AppendLine($"{prefix}{cmd.Name}");
+                        sb.Append(prefix).AppendLine(cmd.Name);
                 }
                 //todo: show botowner only in seky16 guild
                 if (!string.IsNullOrEmpty(sb.ToString()) && module.Name != "BotOwnerModule")
                     embed.AddField(module.Name.Replace("Module", ""), sb.ToString());
             }
-            await this.ReplyAsync(embed: embed.Build());
+            await this.ReplyAsync(embed: embed.Build()).ConfigureAwait(false);
         }
 
         [Command("ping")]
@@ -76,7 +76,7 @@ $"{Format.Bold("Info")}\n"
                 .WithTitle(":ping_pong: Pong!")
                 .WithDescription($"Ping: {ping} ms\nExecution: {execution} ms")
                 .Build();
-            await ReplyAsync(embed: embed);
+            await ReplyAsync(embed: embed).ConfigureAwait(false);
         }
 
         [Command("avatar")]
@@ -84,11 +84,11 @@ $"{Format.Bold("Info")}\n"
         {
             user = user ?? this.Context.User;
             var avatar = user.GetAvatarUrl(size: 2048) ?? "This user has no avatar";
-            await this.ReplyAsync(avatar);
+            await this.ReplyAsync(avatar).ConfigureAwait(false);
         }
 
-        private static string GetHeapSize() => Math.Round(GC.GetTotalMemory(true) / (1024.0 * 1024.0), 2).ToString();
+        //private static string GetHeapSize() => Math.Round(GC.GetTotalMemory(true) / (1024.0 * 1024.0), 2).ToString();
 
-        private static string GetUptime() => (DateTime.Now - Process.GetCurrentProcess().StartTime).ToString(@"dd\.hh\:mm\:ss");
+        //private static string GetUptime() => (DateTime.Now - Process.GetCurrentProcess().StartTime).ToString(@"dd\.hh\:mm\:ss");
     }
 }

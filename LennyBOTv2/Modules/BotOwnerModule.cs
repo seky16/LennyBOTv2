@@ -25,9 +25,9 @@ namespace LennyBOTv2.Modules
         [IsBotOwner]
         public async Task ExitCmdAsync()
         {
-            await this.ReplyAsync("Shutting down... :zzz:");
-            await this.Context.Client.SetStatusAsync(UserStatus.Invisible);
-            await this.Context.Client.StopAsync();
+            await this.ReplyAsync("Shutting down... :zzz:").ConfigureAwait(false);
+            await this.Context.Client.SetStatusAsync(UserStatus.Invisible).ConfigureAwait(false);
+            await this.Context.Client.StopAsync().ConfigureAwait(false);
             Environment.Exit(0);
         }
 
@@ -40,12 +40,12 @@ namespace LennyBOTv2.Modules
         [IsBotOwner]
         public async Task RestartCmdAsync()
         {
-            var msg = await this.ReplyAsync("Restarting... :arrows_counterclockwise:");
-            await this.Context.Client.StopAsync();
-            await this.Context.Client.LogoutAsync();
-            await this.Context.Client.LoginAsync(TokenType.Bot, _config["token"]);
-            await this.Context.Client.StartAsync();
-            await msg.ModifyAsync(m => m.Content = "Restarted :white_check_mark:");
+            var msg = await this.ReplyAsync("Restarting... :arrows_counterclockwise:").ConfigureAwait(false);
+            await this.Context.Client.StopAsync().ConfigureAwait(false);
+            await this.Context.Client.LogoutAsync().ConfigureAwait(false);
+            await this.Context.Client.LoginAsync(TokenType.Bot, _config["token"]).ConfigureAwait(false);
+            await this.Context.Client.StartAsync().ConfigureAwait(false);
+            await msg.ModifyAsync(m => m.Content = "Restarted :white_check_mark:").ConfigureAwait(false);
         }
 
         [Command("say"), Alias("s")]

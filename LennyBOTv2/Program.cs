@@ -12,14 +12,18 @@ namespace LennyBOTv2
 {
     internal class Program
     {
-        public static bool IsDebug = Directory.GetCurrentDirectory().ToLowerInvariant().Contains("debug");
+        public static bool IsDebug; // = Directory.GetCurrentDirectory().Contains("debug", StringComparison.OrdinalIgnoreCase);
         private readonly CommandService _commands = new CommandService();
         private readonly IConfiguration _config;
-        private DiscordSocketClient _client;
+        private readonly DiscordSocketClient _client;
         private IServiceProvider _services;
 
         public Program()
         {
+#if DEBUG
+            IsDebug = true;
+#endif
+
             _client = new DiscordSocketClient(new DiscordSocketConfig
             {
                 LogLevel = LogSeverity.Verbose,
@@ -33,18 +37,18 @@ namespace LennyBOTv2
             _client.Log += LoggingService.LogAsync;
             _commands.Log += LoggingService.LogAsync;
 
-            await _client.LoginAsync(TokenType.Bot, _config["token"]);
-            await _client.StartAsync();
+            await _client.LoginAsync(TokenType.Bot, _config["token"]).ConfigureAwait(false);
+            await _client.StartAsync().ConfigureAwait(false);
 
             _services = LennyServiceProvider.Instance.Build(_client, _config, _commands);
 
-            await _commands.AddModulesAsync(Assembly.GetEntryAssembly(), _services);
+            await _commands.AddModulesAsync(Assembly.GetEntryAssembly(), _services).ConfigureAwait(false);
             _client.MessageReceived += MessageReceived;
 
-            await Task.Delay(-1);
+            await Task.Delay(-1).ConfigureAwait(false);
         }
 
-        private static void Main(string[] args)
+        private static void Main()
         => new Program().MainAsync().GetAwaiter().GetResult();
 
         private IConfiguration BuildConfig()
@@ -65,18 +69,19 @@ namespace LennyBOTv2
             if (!(message.HasMentionPrefix(_client.CurrentUser, ref argPos) || message.HasStringPrefix(_config["prefix"], ref argPos))) return;
 
             var context = new SocketCommandContext(_client, message);
-            var result = await _commands.ExecuteAsync(context, argPos, _services);
+            var result = await _commands.ExecuteAsync(context, argPos, _services).ConfigureAwait(false);
 
             if (result.Error.HasValue)
             {
                 switch (result.Error.Value)
                 {
                     case CommandError.UnknownCommand:
-                        await context.Message.AddReactionAsync(new Emoji("❓"));
+                        await context.Message.AddReactionAsync(new Emoji("❓")).ConfigureAwait(false);
                         break;
 
                     case CommandError.Exception:
                         //await LoggingService.LogException(((ExecuteResult)result).Exception);
+                        await message.AddReactionAsync(new Emoji("❗")).ConfigureAwait(false);
                         break;
 
                     case CommandError.ParseFailed:
@@ -86,8 +91,8 @@ namespace LennyBOTv2
                     case CommandError.UnmetPrecondition:
                     case CommandError.Unsuccessful:
                     default:
-                        await LoggingService.LogError($"{message.Author} '{message.Content}'", result.ErrorReason);
-                        await message.AddReactionAsync(new Emoji("⚠"));
+                        await LoggingService.LogError($"{message.Author} '{message.Content}'", result.ErrorReason).ConfigureAwait(false);
+                        await message.AddReactionAsync(new Emoji("⚠")).ConfigureAwait(false);
                         break;
                 }
             }

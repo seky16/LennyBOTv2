@@ -10,7 +10,7 @@ using OMDbApiNet;
 
 namespace LennyBOTv2.Services
 {
-    internal class LennyServiceProvider
+    internal sealed class LennyServiceProvider
     {
         private static readonly Lazy<LennyServiceProvider> _lazy = new Lazy<LennyServiceProvider>(() => new LennyServiceProvider());
 

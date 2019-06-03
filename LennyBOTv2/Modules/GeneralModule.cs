@@ -11,7 +11,7 @@ namespace LennyBOTv2.Modules
         public async Task DecideCmdAsync(params string[] args)
         {
             var r = LennyServiceProvider.Instance.Rng.Next(0, args.Length);
-            await this.ReplyAsync(args[r]);
+            await this.ReplyAsync(args[r]).ConfigureAwait(false);
         }
 
         [Command("emojify")]
@@ -112,12 +112,12 @@ namespace LennyBOTv2.Modules
                         break;
 
                     default:
-                        stringBuilder.Append($"**{ch.ToString().ToUpper()}** ");
+                        stringBuilder.Append("**").Append(ch.ToString().ToUpper()).Append("** ");
                         break;
                 }
             }
-            await this.ReplyAsync(stringBuilder.ToString());
-            await this.Context.Message.DeleteAsync();
+            await this.ReplyAsync(stringBuilder.ToString()).ConfigureAwait(false);
+            await this.Context.Message.DeleteAsync().ConfigureAwait(false);
         }
     }
 }
