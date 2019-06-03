@@ -20,16 +20,14 @@ namespace LennyBOTv2.Modules
     // todo: make a service?
     public class SearchModule : LennyModuleBase
     {
-        public SearchModule(AsyncOmdbClient omdb, YouTubeService youTube, IConfiguration config)
+        public SearchModule(AsyncOmdbClient omdb, YouTubeService youTube)
         {
             this.Omdb = omdb;
             this.YouTube = youTube;
-            this.Config = config;
         }
 
         public AsyncOmdbClient Omdb { get; }
         public YouTubeService YouTube { get; }
-        public IConfiguration Config { get; }
 
         [Command("amd")]
         public async Task AmdCmdAsync()

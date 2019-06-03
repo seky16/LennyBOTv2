@@ -12,15 +12,13 @@ namespace LennyBOTv2.Modules
 {
     public class InfoModule : LennyModuleBase
     {
-        public InfoModule(CommandService commandService, IConfiguration config)
+        public InfoModule(CommandService commandService)
         {
             this.CommandService = commandService;
-            this.Config = config;
             this.Watch = Stopwatch.StartNew();
         }
 
         public CommandService CommandService { get; }
-        public IConfiguration Config { get; }
         public Stopwatch Watch { get; }
 
         /*[Command("info")]

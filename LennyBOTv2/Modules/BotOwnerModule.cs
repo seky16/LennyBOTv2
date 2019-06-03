@@ -9,13 +9,6 @@ namespace LennyBOTv2.Modules
 {
     public class BotOwnerModule : LennyModuleBase
     {
-        private readonly IConfiguration _config;
-
-        public BotOwnerModule(IConfiguration config)
-        {
-            _config = config;
-        }
-
         [Command("botnick")]
         [IsBotOwner]
         public async Task BotNickCmdAsync([Remainder]string name)
@@ -43,7 +36,7 @@ namespace LennyBOTv2.Modules
             var msg = await this.ReplyAsync("Restarting... :arrows_counterclockwise:").ConfigureAwait(false);
             await this.Context.Client.StopAsync().ConfigureAwait(false);
             await this.Context.Client.LogoutAsync().ConfigureAwait(false);
-            await this.Context.Client.LoginAsync(TokenType.Bot, _config["token"]).ConfigureAwait(false);
+            await this.Context.Client.LoginAsync(TokenType.Bot, Config["token"]).ConfigureAwait(false);
             await this.Context.Client.StartAsync().ConfigureAwait(false);
             await msg.ModifyAsync(m => m.Content = "Restarted :white_check_mark:").ConfigureAwait(false);
         }
