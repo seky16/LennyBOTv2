@@ -14,14 +14,8 @@ namespace LennyBOTv2.Services
     {
         private static readonly Lazy<LennyServiceProvider> _lazy = new Lazy<LennyServiceProvider>(() => new LennyServiceProvider());
 
-        private LennyServiceProvider()
-        {
-            this.Rng = new Random();
-        }
-
         public static LennyServiceProvider Instance => _lazy.Value;
 
-        public Random Rng { get; }
         public IServiceProvider ServiceProvider { get; private set; } = null;
 
         public IServiceProvider Build(DiscordSocketClient client, IConfiguration config, CommandService commands)
@@ -37,6 +31,7 @@ namespace LennyBOTv2.Services
                 .AddSingleton(new InteractiveService((BaseSocketClient)client))
                 .AddSingleton(new AsyncOmdbClient(config["omdbAPIkey"], true))
                 .AddSingleton(new YouTubeService(new BaseClientService.Initializer() { ApiKey = config["youtubeAPIkey"], ApplicationName = "LennyBOT" }))
+                .AddSingleton<SearchService>()
 
                 .BuildServiceProvider();
 
@@ -47,7 +42,7 @@ namespace LennyBOTv2.Services
             // third-party
             FixerSharp.Fixer.SetApiKey(config["fixerAPIkey"]);
 
-            return this.ServiceProvider;
+            return ServiceProvider;
         }
     }
 }

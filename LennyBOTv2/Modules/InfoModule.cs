@@ -14,8 +14,8 @@ namespace LennyBOTv2.Modules
     {
         public InfoModule(CommandService commandService)
         {
-            this.CommandService = commandService;
-            this.Watch = Stopwatch.StartNew();
+            CommandService = commandService;
+            Watch = Stopwatch.StartNew();
         }
 
         public CommandService CommandService { get; }
@@ -47,13 +47,13 @@ $"{Format.Bold("Info")}\n"
         public async Task HelpCmdAsync()
         {
             var embed = new EmbedBuilder().WithTitle(":keyboard: Available commands").WithColor(new Color(255, 255, 255));
-            var prefix = this.Config["prefix"];
-            foreach (var module in this.CommandService.Modules)
+            var prefix = Config["prefix"];
+            foreach (var module in CommandService.Modules)
             {
                 var sb = new StringBuilder();
                 foreach (var cmd in module.Commands)
                 {
-                    var result = await cmd.CheckPreconditionsAsync(this.Context, LennyServiceProvider.Instance.ServiceProvider).ConfigureAwait(false);
+                    var result = await cmd.CheckPreconditionsAsync(Context, LennyServiceProvider.Instance.ServiceProvider).ConfigureAwait(false);
                     if (result.IsSuccess)
                         sb.Append(prefix).AppendLine(cmd.Name);
                 }
@@ -61,28 +61,27 @@ $"{Format.Bold("Info")}\n"
                 if (!string.IsNullOrEmpty(sb.ToString()) && module.Name != "BotOwnerModule")
                     embed.AddField(module.Name.Replace("Module", ""), sb.ToString());
             }
-            await this.ReplyAsync(embed: embed.Build()).ConfigureAwait(false);
+            await ReplyEmbedAsync(embed).ConfigureAwait(false);
         }
 
         [Command("ping")]
         public async Task PingCmdAsync()
         {
-            this.Watch.Stop();
-            var execution = this.Watch.ElapsedMilliseconds;
-            var ping = this.Context.Client.Latency;
+            Watch.Stop();
+            var execution = Watch.ElapsedMilliseconds;
+            var ping = Context.Client.Latency;
             var embed = new EmbedBuilder()
                 .WithTitle(":ping_pong: Pong!")
-                .WithDescription($"Ping: {ping} ms\nExecution: {execution} ms")
-                .Build();
-            await ReplyAsync(embed: embed).ConfigureAwait(false);
+                .WithDescription($"Ping: {ping} ms\nExecution: {execution} ms");
+            await ReplyEmbedAsync(embed).ConfigureAwait(false);
         }
 
         [Command("avatar")]
         public async Task UserAvatarAsync(SocketUser user = null)
         {
-            user = user ?? this.Context.User;
+            user = user ?? Context.User;
             var avatar = user.GetAvatarUrl(size: 2048) ?? "This user has no avatar";
-            await this.ReplyAsync(avatar).ConfigureAwait(false);
+            await ReplyAsync(avatar).ConfigureAwait(false);
         }
 
         //private static string GetHeapSize() => Math.Round(GC.GetTotalMemory(true) / (1024.0 * 1024.0), 2).ToString();

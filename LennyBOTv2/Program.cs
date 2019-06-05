@@ -36,6 +36,7 @@ namespace LennyBOTv2
         {
             _client.Log += LoggingService.LogAsync;
             _commands.Log += LoggingService.LogAsync;
+            _client.Disconnected += (ex) => LoggingService.LogException(ex);
 
             await _client.LoginAsync(TokenType.Bot, _config["token"]).ConfigureAwait(false);
             await _client.StartAsync().ConfigureAwait(false);
@@ -67,6 +68,10 @@ namespace LennyBOTv2
 
             int argPos = 0;
             if (!(message.HasMentionPrefix(_client.CurrentUser, ref argPos) || message.HasStringPrefix(_config["prefix"], ref argPos))) return;
+
+            // ignore msg with prefix only
+            if (string.IsNullOrEmpty(message.Content?.Replace(_config["prefix"], "").Trim()))
+                return;
 
             var context = new SocketCommandContext(_client, message);
             var result = await _commands.ExecuteAsync(context, argPos, _services).ConfigureAwait(false);

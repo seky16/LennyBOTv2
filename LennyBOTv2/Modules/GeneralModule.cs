@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using Discord.Commands;
 using LennyBOTv2.Services;
+using Seky16.Extensions;
 
 namespace LennyBOTv2.Modules
 {
@@ -10,8 +11,7 @@ namespace LennyBOTv2.Modules
         [Command("decide")]
         public async Task DecideCmdAsync(params string[] args)
         {
-            var r = LennyServiceProvider.Instance.Rng.Next(0, args.Length);
-            await this.ReplyAsync(args[r]).ConfigureAwait(false);
+            await ReplyAsync(args.Random()).ConfigureAwait(false);
         }
 
         [Command("emojify")]
@@ -48,7 +48,7 @@ namespace LennyBOTv2.Modules
                     case 'x':
                     case 'y':
                     case 'z':
-                        stringBuilder.Append($":regional_indicator_{ch}: ");
+                        stringBuilder.Append(":regional_indicator_").Append(ch).Append(": ");
                         break;
 
                     case '0':
@@ -116,8 +116,8 @@ namespace LennyBOTv2.Modules
                         break;
                 }
             }
-            await this.ReplyAsync(stringBuilder.ToString()).ConfigureAwait(false);
-            await this.Context.Message.DeleteAsync().ConfigureAwait(false);
+            await ReplyAsync(stringBuilder.ToString()).ConfigureAwait(false);
+            await Context.Message.DeleteAsync().ConfigureAwait(false);
         }
     }
 }

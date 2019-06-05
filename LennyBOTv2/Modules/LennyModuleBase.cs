@@ -16,23 +16,29 @@ namespace LennyBOTv2.Modules
         public SocketTextChannel GetNotificationChannel()
         {
             var channelId = Convert.ToUInt64(Config["notificationChannel"]);
-            return this.Context.Client.GetChannel(channelId) as SocketTextChannel;
+            return Context.Client.GetChannel(channelId) as SocketTextChannel;
         }
 
         public SocketUser GetOwner()
         {
             var ownerId = Convert.ToUInt64(Config["owner"]);
-            return this.Context.Client.GetUser(ownerId);
+            return Context.Client.GetUser(ownerId);
         }
 
         public async Task MarkCmdFailedAsync(string reason = "")
         {
-            await this.Context.Message.AddReactionAsync(new Emoji("⚠")).ConfigureAwait(false);
+            await Context.Message.AddReactionAsync(new Emoji("⚠")).ConfigureAwait(false);
             if (!string.IsNullOrWhiteSpace(reason))
                 reason = $" (Reason: {reason})";
-            var msg = $"{this.Context.User.Username} '{this.Context.Message.Content}' failed. {reason.Trim()}";
+            var msg = $"{Context.User.Username} '{Context.Message.Content}' failed. {reason.Trim()}";
             await LoggingService.LogError(msg).ConfigureAwait(false);
-            await this.GetNotificationChannel().SendMessageAsync($"{this.GetOwner().Mention}\n{msg}").ConfigureAwait(false);
+            await GetNotificationChannel().SendMessageAsync($"{GetOwner().Mention}\n{msg}").ConfigureAwait(false);
         }
+
+        public Task<IUserMessage> ReplyEmbedAsync(Embed embed)
+            => ReplyAsync("", false, embed, null);
+
+        public Task<IUserMessage> ReplyEmbedAsync(EmbedBuilder builder)
+            => ReplyAsync("", false, builder.Build(), null);
     }
 }

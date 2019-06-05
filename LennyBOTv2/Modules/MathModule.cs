@@ -21,12 +21,12 @@ namespace LennyBOTv2.Modules
                 var get = await client.GetAsync(url).ConfigureAwait(false);
                 if (!get.IsSuccessStatusCode)
                 {
-                    await this.MarkCmdFailedAsync($"math.js API returned {get.StatusCode}").ConfigureAwait(false);
+                    await MarkCmdFailedAsync($"math.js API returned {get.StatusCode}").ConfigureAwait(false);
                     return;
                 }
 
                 var result = await get.Content.ReadAsStringAsync().ConfigureAwait(false);
-                await this.ReplyAsync($"`{expression} = {result}`").ConfigureAwait(false);
+                await ReplyAsync($"`{expression} = {result}`").ConfigureAwait(false);
             }
         }
 
@@ -45,12 +45,14 @@ namespace LennyBOTv2.Modules
 
             var result = await Fixer.ConvertAsync(from, to, amountD).ConfigureAwait(false);
             result = Math.Round(result, 2);
-            var builder = new EmbedBuilder()
+            var embed = new EmbedBuilder()
                 .WithColor(Color.DarkGreen)
-                .WithAuthor(new EmbedAuthorBuilder().WithName(Context.User.GetNickname()).WithIconUrl(Context.User.GetAvatarUrl() ?? Context.User.GetDefaultAvatarUrl()))
+                .WithAuthor(new EmbedAuthorBuilder()
+                    .WithName(Context.User.GetNickname())
+                    .WithIconUrl(Context.User.GetAvatarUrl() ?? Context.User.GetDefaultAvatarUrl()))
                 .WithCurrentTimestamp()
                 .WithDescription($"{amountD.ToString(CultureInfo.InvariantCulture)} {from.ToUpper()} = **{result.ToString(CultureInfo.InvariantCulture)} {to.ToUpper()}**");
-            await this.ReplyAsync(string.Empty, false, builder.Build()).ConfigureAwait(false);
+            await ReplyEmbedAsync(embed).ConfigureAwait(false);
         }
     }
 }
