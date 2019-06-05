@@ -31,7 +31,6 @@ namespace LennyBOTv2.Services
                 .AddSingleton(new InteractiveService((BaseSocketClient)client))
                 .AddSingleton(new AsyncOmdbClient(config["omdbAPIkey"], true))
                 .AddSingleton(new YouTubeService(new BaseClientService.Initializer() { ApiKey = config["youtubeAPIkey"], ApplicationName = "LennyBOT" }))
-                .AddSingleton<SearchService>()
 
                 .BuildServiceProvider();
 
