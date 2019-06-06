@@ -20,7 +20,7 @@ namespace LennyBOTv2
                 }
                 catch (Exception ex)
                 {
-                    await LoggingService.LogException(ex).ConfigureAwait(false);
+                    await LoggingService.LogExceptionAsync(ex).ConfigureAwait(false);
                 }
             });
             return msg;
@@ -43,7 +43,7 @@ namespace LennyBOTv2
                 }
                 catch (Exception ex)
                 {
-                    await LoggingService.LogException(ex).ConfigureAwait(false);
+                    await LoggingService.LogExceptionAsync(ex).ConfigureAwait(false);
                 }
             });
             return msg;

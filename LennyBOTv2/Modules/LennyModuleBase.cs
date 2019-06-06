@@ -31,7 +31,7 @@ namespace LennyBOTv2.Modules
             if (!string.IsNullOrWhiteSpace(reason))
                 reason = $" (Reason: {reason})";
             var msg = $"{Context.User.Username} '{Context.Message.Content}' failed. {reason.Trim()}";
-            await LoggingService.LogError(msg).ConfigureAwait(false);
+            await LoggingService.LogErrorAsync(msg).ConfigureAwait(false);
             await GetNotificationChannel().SendMessageAsync($"{GetOwner().Mention}\n{msg}").ConfigureAwait(false);
         }
 

@@ -27,16 +27,18 @@ namespace LennyBOTv2.Services
                 .AddSingleton(client)
                 .AddSingleton(config)
                 .AddSingleton(commands)
-                .AddSingleton<LoggingService>()
                 .AddSingleton(new InteractiveService((BaseSocketClient)client))
                 .AddSingleton(new AsyncOmdbClient(config["omdbAPIkey"], true))
                 .AddSingleton(new YouTubeService(new BaseClientService.Initializer() { ApiKey = config["youtubeAPIkey"], ApplicationName = "LennyBOT" }))
 
                 .BuildServiceProvider();
 
+            // disable buttons in InteractiveService
             PaginatedAppearanceOptions.Default.DisplayInformationIcon = false;
             PaginatedAppearanceOptions.Default.JumpDisplayOptions = JumpDisplayOptions.Never;
             PaginatedAppearanceOptions.Default.Stop = null;
+
+            new ReliabilityService(client);
 
             // third-party
             FixerSharp.Fixer.SetApiKey(config["fixerAPIkey"]);

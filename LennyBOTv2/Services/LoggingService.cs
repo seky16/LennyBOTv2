@@ -4,9 +4,7 @@ using Discord;
 
 namespace LennyBOTv2.Services
 {
-#pragma warning disable RCS1102 // Make class static.
-    internal class LoggingService
-#pragma warning restore RCS1102 // Make class static.
+    internal static class LoggingService
     {
         public static Task LogAsync(LogMessage msg)
         {
@@ -42,18 +40,18 @@ namespace LennyBOTv2.Services
             return Task.CompletedTask;
         }
 
-        public static Task LogCritical(string msg, string source = "") => LogAsync(new LogMessage(LogSeverity.Critical, source, msg));
+        public static Task LogCriticalAsync(string msg, string source = "") => LogAsync(new LogMessage(LogSeverity.Critical, source, msg));
 
-        public static Task LogDebug(string msg, string source = "") => LogAsync(new LogMessage(LogSeverity.Debug, source, msg));
+        public static Task LogDebugAsync(string msg, string source = "") => LogAsync(new LogMessage(LogSeverity.Debug, source, msg));
 
-        public static Task LogError(string msg, string source = "") => LogAsync(new LogMessage(LogSeverity.Error, source, msg));
+        public static Task LogErrorAsync(string msg, string source = "") => LogAsync(new LogMessage(LogSeverity.Error, source, msg));
 
-        public static Task LogException(Exception ex, string source = "", string msg = "") => LogAsync(new LogMessage(LogSeverity.Error, source, msg, ex));
+        public static Task LogExceptionAsync(Exception ex, string source = "", string msg = "") => LogAsync(new LogMessage(LogSeverity.Error, source, msg, ex));
 
-        public static Task LogInfo(string msg, string source = "") => LogAsync(new LogMessage(LogSeverity.Info, source, msg));
+        public static Task LogInfoAsync(string msg, string source = "") => LogAsync(new LogMessage(LogSeverity.Info, source, msg));
 
-        public static Task LogVerbose(string msg, string source = "") => LogAsync(new LogMessage(LogSeverity.Verbose, source, msg));
+        public static Task LogVerboseAsync(string msg, string source = "") => LogAsync(new LogMessage(LogSeverity.Verbose, source, msg));
 
-        public static Task LogWarning(string msg, string source = "") => LogAsync(new LogMessage(LogSeverity.Warning, source, msg));
+        public static Task LogWarningAsync(string msg, string source = "") => LogAsync(new LogMessage(LogSeverity.Warning, source, msg));
     }
 }
