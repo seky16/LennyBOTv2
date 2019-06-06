@@ -52,7 +52,7 @@ namespace LennyBOTv2.Services
             return Task.CompletedTask;
         }
 
-        private Task DisconnectedAsync(Exception _)
+        private Task DisconnectedAsync(Exception ex)
         {
             // Check the state after <timeout> to see if we reconnected
             LogInfoAsync("Client disconnected, starting timeout task...");
