@@ -21,7 +21,7 @@ namespace LennyBOTv2.Modules
                 var get = await client.GetAsync(url).ConfigureAwait(false);
                 if (!get.IsSuccessStatusCode)
                 {
-                    await MarkCmdFailedAsync($"math.js API returned {get.StatusCode}").ConfigureAwait(false);
+                    await Context.MarkCmdFailedAsync($"math.js API returned {get.StatusCode}").ConfigureAwait(false);
                     return;
                 }
 
@@ -36,7 +36,7 @@ namespace LennyBOTv2.Modules
             amount = amount.Replace(',', '.');
             if (!double.TryParse(amount, out var amountD))
             {
-                await MarkCmdFailedAsync($"Unable to parse {amount} to double").ConfigureAwait(false);
+                await Context.MarkCmdFailedAsync($"Unable to parse {amount} to double").ConfigureAwait(false);
                 return;
             }
 

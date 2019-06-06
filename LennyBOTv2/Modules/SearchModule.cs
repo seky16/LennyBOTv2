@@ -47,7 +47,7 @@ namespace LennyBOTv2.Modules
             var list = await Omdb.GetSearchListAsync(query).ConfigureAwait(false);
             if (!string.IsNullOrEmpty(list.Error))
             {
-                await MarkCmdFailedAsync($"OMDB: {list.Error}").ConfigureAwait(false);
+                await Context.MarkCmdFailedAsync($"OMDB: {list.Error}").ConfigureAwait(false);
                 return;
             }
             if (list.SearchResults.Count == 1)
@@ -110,7 +110,7 @@ Awards: {item.Awards}";
                 var result = await client.GetAsync(string.Format("http://api.urbandictionary.com/v0/define?term={0}", query.Replace(' ', '+'))).ConfigureAwait(false);
                 if (!result.IsSuccessStatusCode)
                 {
-                    await MarkCmdFailedAsync($"UrbanDict API returned {result.StatusCode}").ConfigureAwait(false);
+                    await Context.MarkCmdFailedAsync($"UrbanDict API returned {result.StatusCode}").ConfigureAwait(false);
                     return;
                 }
 
@@ -151,7 +151,7 @@ Awards: {item.Awards}";
                 var result = await client.GetAsync(string.Format("https://api.apixu.com/v1/forecast.json?key={1}&q={0}", query.Replace(' ', '+'), Config["apixuAPIkey"])).ConfigureAwait(false);
                 if (!result.IsSuccessStatusCode)
                 {
-                    await MarkCmdFailedAsync($"Apixu weather API returned {result.StatusCode}").ConfigureAwait(false);
+                    await Context.MarkCmdFailedAsync($"Apixu weather API returned {result.StatusCode}").ConfigureAwait(false);
                     return;
                 }
 
@@ -189,7 +189,7 @@ Awards: {item.Awards}";
 
                 if (!getResult.IsSuccessStatusCode)
                 {
-                    await MarkCmdFailedAsync($"Wikipedia API returned {getResult.StatusCode}").ConfigureAwait(false);
+                    await Context.MarkCmdFailedAsync($"Wikipedia API returned {getResult.StatusCode}").ConfigureAwait(false);
                     return;
                 }
 

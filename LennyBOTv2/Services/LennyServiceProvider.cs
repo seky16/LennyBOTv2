@@ -16,7 +16,8 @@ namespace LennyBOTv2.Services
 
         public static LennyServiceProvider Instance => _lazy.Value;
 
-        public IServiceProvider ServiceProvider { get; private set; } = null;
+        public IConfiguration Config => (IConfiguration)ServiceProvider?.GetService(typeof(IConfiguration));
+        public IServiceProvider ServiceProvider { get; private set; }
 
         public IServiceProvider Build(DiscordSocketClient client, IConfiguration config, CommandService commands)
         {

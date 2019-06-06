@@ -2,6 +2,8 @@
 using System.Linq;
 using System.Threading.Tasks;
 using Discord;
+using Discord.Commands;
+using Discord.WebSocket;
 using LennyBOTv2.Services;
 using NodaTime;
 
@@ -20,7 +22,7 @@ namespace LennyBOTv2
                 }
                 catch (Exception ex)
                 {
-                    await LoggingService.LogExceptionAsync(ex).ConfigureAwait(false);
+                    await LoggingService.LogExceptionAsync(ex, "DeleteAfter").ConfigureAwait(false);
                 }
             });
             return msg;
@@ -31,6 +33,28 @@ namespace LennyBOTv2
 
         public static string GetNickname(this IUser user)
             => (user as IGuildUser)?.Nickname ?? user.Username ?? "";
+
+        public static SocketTextChannel GetNotificationChannel(this SocketCommandContext context)
+        {
+            var channelId = Convert.ToUInt64(LennyServiceProvider.Instance.Config["notificationChannel"]);
+            return context.Client.GetChannel(channelId) as SocketTextChannel;
+        }
+
+        public static SocketUser GetOwner(this SocketCommandContext context)
+        {
+            var ownerId = Convert.ToUInt64(LennyServiceProvider.Instance.Config["owner"]);
+            return context.Client.GetUser(ownerId);
+        }
+
+        public static async Task MarkCmdFailedAsync(this SocketCommandContext context, string reason = "")
+        {
+            await context.Message.AddReactionAsync(new Emoji("⚠")).ConfigureAwait(false);
+            if (!string.IsNullOrEmpty(reason))
+                reason = $"(Reason: {reason})";
+            var msg = $"{context.Guild}/{context.Channel}/{context.User.Username} '{context.Message.Content}' failed. {reason}";
+            await LoggingService.LogErrorAsync(msg, "Command").ConfigureAwait(false);
+            await context.GetNotificationChannel().SendMessageAsync($"{context.GetOwner().Mention}\n{msg}").ConfigureAwait(false);
+        }
 
         public static IMessage ModifyAfter(this IUserMessage msg, int seconds, string newContent)
         {
@@ -43,7 +67,7 @@ namespace LennyBOTv2
                 }
                 catch (Exception ex)
                 {
-                    await LoggingService.LogExceptionAsync(ex).ConfigureAwait(false);
+                    await LoggingService.LogExceptionAsync(ex, "ModifyAfter").ConfigureAwait(false);
                 }
             });
             return msg;

@@ -3,7 +3,6 @@ using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
 using LennyBOTv2.Preconditions;
-using Microsoft.Extensions.Configuration;
 
 namespace LennyBOTv2.Modules
 {

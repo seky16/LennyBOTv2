@@ -21,7 +21,7 @@ namespace LennyBOTv2.Services
 
         private Task ConnectedAsync()
         {
-            LoggingService.LogInfoAsync("Client reconnected");
+            LoggingService.LogInfoAsync("Client reconnected", nameof(ReliabilityService));
 
             // Bot connected so cancel the task.
             token.Cancel();
@@ -30,9 +30,9 @@ namespace LennyBOTv2.Services
             return Task.CompletedTask;
         }
 
-        private Task DisconnectedAsync(Exception _e)
+        private Task DisconnectedAsync(Exception ex)
         {
-            LoggingService.LogErrorAsync($"Client disconnected with error: {_e.Message}");
+            LoggingService.LogExceptionAsync(ex, nameof(ReliabilityService));
 
             Task.Delay(TimeSpan.FromSeconds(15), token.Token).ContinueWith(_ => ResetClient());
 
@@ -45,14 +45,13 @@ namespace LennyBOTv2.Services
             if (client.ConnectionState == Discord.ConnectionState.Connected)
                 return;
 
-            LoggingService.LogInfoAsync("Attempting to reset the client");
+            LoggingService.LogInfoAsync("Attempting to reset the client", nameof(ReliabilityService));
 
             var connect = client.StartAsync();
-
             if (connect.IsCompletedSuccessfully)
-                LoggingService.LogInfoAsync("Client reset successfully!");
+                LoggingService.LogInfoAsync("Client reset successfully!", nameof(ReliabilityService));
             else
-                LoggingService.LogCriticalAsync("Client did not reset successfully");
+                LoggingService.LogExceptionAsync(connect.Exception, nameof(ReliabilityService), "Client did not reset successfully");
         }
     }
 }

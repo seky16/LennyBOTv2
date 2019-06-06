@@ -1,7 +1,6 @@
 ﻿using System.Text;
 using System.Threading.Tasks;
 using Discord.Commands;
-using LennyBOTv2.Services;
 using Seky16.Extensions;
 
 namespace LennyBOTv2.Modules

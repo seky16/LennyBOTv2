@@ -1,12 +1,10 @@
-﻿using System;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.Text;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
 using LennyBOTv2.Services;
-using Microsoft.Extensions.Configuration;
 
 namespace LennyBOTv2.Modules
 {

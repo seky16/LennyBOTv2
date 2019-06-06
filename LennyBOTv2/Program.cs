@@ -36,7 +36,7 @@ namespace LennyBOTv2
         {
             _client.Log += LoggingService.LogAsync;
             _commands.Log += LoggingService.LogAsync;
-            _client.Disconnected += (ex) => LoggingService.LogExceptionAsync(ex);
+            _client.Disconnected += (ex) => LoggingService.LogExceptionAsync(ex, "Client");
 
             await _client.LoginAsync(TokenType.Bot, _config["token"]).ConfigureAwait(false);
             await _client.StartAsync().ConfigureAwait(false);
@@ -56,6 +56,8 @@ namespace LennyBOTv2
         {
             var cwd = Directory.GetCurrentDirectory();
             var file = IsDebug ? "Files/testConfig.json" : "Files/config.json";
+            if (!File.Exists(Path.Combine(cwd, file)))
+                throw new FileNotFoundException("Couldn't find config file.", file);
             LoggingService.LogInfoAsync($"{file} loaded", "Config");
             return new ConfigurationBuilder().SetBasePath(cwd).AddJsonFile(file).Build();
         }
@@ -96,8 +98,7 @@ namespace LennyBOTv2
                     case CommandError.UnmetPrecondition:
                     case CommandError.Unsuccessful:
                     default:
-                        await LoggingService.LogErrorAsync($"{message.Author} '{message.Content}'", result.ErrorReason).ConfigureAwait(false);
-                        await message.AddReactionAsync(new Emoji("⚠")).ConfigureAwait(false);
+                        await context.MarkCmdFailedAsync(result.ErrorReason).ConfigureAwait(false);
                         break;
                 }
             }
