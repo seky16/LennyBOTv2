@@ -12,7 +12,7 @@ namespace LennyBOTv2
 {
     internal class Program
     {
-        public static bool IsDebug; // = Directory.GetCurrentDirectory().Contains("debug", StringComparison.OrdinalIgnoreCase);
+        public static bool IsDebug = false;
         private readonly CommandService _commands = new CommandService();
         private readonly IConfiguration _config;
         private readonly DiscordSocketClient _client;
@@ -26,7 +26,7 @@ namespace LennyBOTv2
 
             _client = new DiscordSocketClient(new DiscordSocketConfig
             {
-                LogLevel = LogSeverity.Verbose,
+                LogLevel = IsDebug ? LogSeverity.Debug : LogSeverity.Info,
                 MessageCacheSize = 1000
             });
             _config = BuildConfig();

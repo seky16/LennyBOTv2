@@ -21,13 +21,13 @@ namespace LennyBOTv2.Services
                     break;
 
                 case LogSeverity.Info:
-                    Console.ForegroundColor = ConsoleColor.Blue;
+                    Console.ForegroundColor = ConsoleColor.White;
                     break;
 
                 case LogSeverity.Verbose:
                 case LogSeverity.Debug:
                 default:
-                    Console.ForegroundColor = ConsoleColor.White;
+                    Console.ForegroundColor = ConsoleColor.DarkGray;
                     break;
             }
 
