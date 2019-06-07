@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using System.Threading.Tasks;
@@ -13,9 +14,9 @@ namespace LennyBOTv2
     internal class Program
     {
         public static bool IsDebug = false;
+        private readonly DiscordSocketClient _client;
         private readonly CommandService _commands = new CommandService();
         private readonly IConfiguration _config;
-        private readonly DiscordSocketClient _client;
         private IServiceProvider _services;
 
         public Program()
@@ -44,7 +45,7 @@ namespace LennyBOTv2
             _services = LennyServiceProvider.Instance.Build(_client, _config, _commands);
 
             await _commands.AddModulesAsync(Assembly.GetEntryAssembly(), _services).ConfigureAwait(false);
-            _client.MessageReceived += MessageReceived;
+            _client.MessageReceived += HandleMessage;
 
             await Task.Delay(-1).ConfigureAwait(false);
         }
@@ -62,20 +63,27 @@ namespace LennyBOTv2
             return new ConfigurationBuilder().SetBasePath(cwd).AddJsonFile(file).Build();
         }
 
-        private async Task MessageReceived(SocketMessage rawMessage)
+        private async Task HandleMessage(SocketMessage rawMessage)
         {
             // Ignore system messages and messages from bots
             if (!(rawMessage is SocketUserMessage message)) return;
             if (message.Source != MessageSource.User) return;
 
-            int argPos = 0;
-            if (!(message.HasMentionPrefix(_client.CurrentUser, ref argPos) || message.HasStringPrefix(_config["prefix"], ref argPos))) return;
-
-            // ignore msg with prefix only
-            if (string.IsNullOrEmpty(message.Content?.Replace(_config["prefix"], "").Trim()))
-                return;
-
             var context = new SocketCommandContext(_client, message);
+
+            if (CheckForRepetition(message))
+            {
+                await context.Channel.SendMessageAsync(message.Content).ConfigureAwait(false);
+                return;
+            }
+
+            var prefix = _config["prefix"];
+            int argPos = 0;
+            if (!(message.HasMentionPrefix(_client.CurrentUser, ref argPos) || message.HasStringPrefix(prefix, ref argPos))) return;
+
+            ////ignore msg with prefix only - disabled as per request
+            //if (string.IsNullOrEmpty(message.Content?.Replace(prefix, "").Trim())) return;
+
             var result = await _commands.ExecuteAsync(context, argPos, _services).ConfigureAwait(false);
 
             if (result.Error.HasValue)
@@ -103,5 +111,37 @@ namespace LennyBOTv2
                 }
             }
         }
+
+        #region Repetition
+
+        private readonly List<SocketUserMessage> lastMessages = new List<SocketUserMessage>();
+        private const int repetitionCount = 3;
+
+        private bool CheckForRepetition(SocketUserMessage msg)
+        {
+            if (lastMessages.Count == 0)
+            {
+                lastMessages.Add(msg);
+                return false;
+            }
+            else
+            {
+                var lastMsg = lastMessages[lastMessages.Count - 1];
+                if (!(lastMsg.Author.Id != msg.Author.Id && lastMsg.Content.Equals(msg.Content, StringComparison.Ordinal)))
+                    lastMessages.Clear();
+
+                lastMessages.Add(msg);
+            }
+
+            if (lastMessages.Count >= repetitionCount)
+            {
+                lastMessages.Clear();
+                return true;
+            }
+
+            return false;
+        }
+
+        #endregion Repetition
     }
 }
