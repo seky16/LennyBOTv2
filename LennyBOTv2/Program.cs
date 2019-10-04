@@ -34,7 +34,7 @@ namespace LennyBOTv2
             {
                 DefaultRunMode = RunMode.Async,
                 CaseSensitiveCommands = false,
-                LogLevel = LogSeverity.Verbose
+                LogLevel = IsDebug ? LogSeverity.Debug : LogSeverity.Info,
             });
             _config = BuildConfig();
         }
