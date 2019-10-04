@@ -5,7 +5,7 @@ using LennyBOTv2.Services;
 
 namespace LennyBOTv2.Preconditions
 {
-    internal class IsBotOwner : PreconditionAttribute
+    internal sealed class IsBotOwner : PreconditionAttribute
     {
         public override Task<PreconditionResult> CheckPermissionsAsync(ICommandContext context, CommandInfo command, IServiceProvider services)
         {

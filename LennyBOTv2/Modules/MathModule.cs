@@ -16,18 +16,16 @@ namespace LennyBOTv2.Modules
             expression = expression.Replace("`", string.Empty);
             var url = $"http://api.mathjs.org/v4/?expr={ Uri.EscapeDataString(expression)}";
 
-            using (var client = new HttpClient())
+            using var client = new HttpClient();
+            var get = await client.GetAsync(url).ConfigureAwait(false);
+            if (!get.IsSuccessStatusCode)
             {
-                var get = await client.GetAsync(url).ConfigureAwait(false);
-                if (!get.IsSuccessStatusCode)
-                {
-                    await Context.MarkCmdFailedAsync($"math.js API returned {get.StatusCode}").ConfigureAwait(false);
-                    return;
-                }
-
-                var result = await get.Content.ReadAsStringAsync().ConfigureAwait(false);
-                await ReplyAsync($"`{expression} = {result}`").ConfigureAwait(false);
+                await Context.MarkCmdFailedAsync($"math.js API returned {get.StatusCode}").ConfigureAwait(false);
+                return;
             }
+
+            var result = await get.Content.ReadAsStringAsync().ConfigureAwait(false);
+            await ReplyAsync($"`{expression} = {result}`").ConfigureAwait(false);
         }
 
         [Command("conv")]

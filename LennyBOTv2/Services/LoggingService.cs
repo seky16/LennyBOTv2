@@ -46,7 +46,7 @@ namespace LennyBOTv2.Services
 
         public static Task LogErrorAsync(string msg, string source = "") => LogAsync(new LogMessage(LogSeverity.Error, source, msg));
 
-        public static Task LogExceptionAsync(Exception ex, string source = "", string msg = "") => LogAsync(new LogMessage(LogSeverity.Error, source, msg, ex));
+        public static Task LogExceptionAsync(Exception? ex, string source = "", string msg = "") => LogAsync(new LogMessage(LogSeverity.Error, source, msg, ex));
 
         public static Task LogInfoAsync(string msg, string source = "") => LogAsync(new LogMessage(LogSeverity.Info, source, msg));
 

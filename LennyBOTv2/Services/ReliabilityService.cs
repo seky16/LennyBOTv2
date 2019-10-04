@@ -102,13 +102,13 @@ namespace LennyBOTv2.Services
 #pragma warning restore CS0162 // Unreachable code detected
         }
 
-        private Task LogCriticalAsync(string message)
+        private static Task LogCriticalAsync(string message)
             => LoggingService.LogCriticalAsync(message, logSource);
 
-        private Task LogDebugAsync(string message)
+        private static Task LogDebugAsync(string message)
             => LoggingService.LogDebugAsync(message, logSource);
 
-        private Task LogInfoAsync(string message)
+        private static Task LogInfoAsync(string message)
             => LoggingService.LogInfoAsync(message, logSource);
     }
 }

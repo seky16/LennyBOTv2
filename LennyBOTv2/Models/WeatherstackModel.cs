@@ -5,7 +5,7 @@ namespace LennyBOTv2.Models
     // https://weatherstack.com/documentation#current_weather
 #pragma warning disable IDE1006 // Naming Styles
 
-    internal class WeatherstackModel
+    internal static class WeatherstackModel
     {
         public class Current
         {
@@ -27,7 +27,7 @@ namespace LennyBOTv2.Models
             /// <summary>
             /// Returns the UTC time for when the returned whether data was collected.
             /// </summary>
-            public string observation_time { get; set; }
+            public string observation_time { get; set; } = "";
 
             /// <summary>
             /// Returns the precipitation level in the selected unit. (Default: MM - millimeters)
@@ -68,7 +68,7 @@ namespace LennyBOTv2.Models
             /// <summary>
             /// Returns the wind direction.
             /// </summary>
-            public string wind_dir { get; set; }
+            public string wind_dir { get; set; } = "";
 
             /// <summary>
             /// Returns the wind speed in the selected unit. (Default: kilometers/hour)
@@ -78,12 +78,12 @@ namespace LennyBOTv2.Models
             /// <summary>
             /// Returns one or more PNG weather icons associated with the current weather condition.
             /// </summary>
-            public List<string> weather_icons { get; set; }
+            public List<string> weather_icons { get; set; } = new List<string>();
 
             /// <summary>
             /// Returns one or more weather description texts associated with the current weather condition.
             /// </summary>
-            public List<string> weather_descriptions { get; set; }
+            public List<string> weather_descriptions { get; set; } = new List<string>();
         }
 
         public class Location
@@ -91,7 +91,7 @@ namespace LennyBOTv2.Models
             /// <summary>
             /// Returns the country name associated with the location used for this request.
             /// </summary>
-            public string country { get; set; }
+            public string country { get; set; } = "";
 
             /// <summary>
             /// Returns the latitude coordinate associated with the location used for this request.
@@ -101,7 +101,7 @@ namespace LennyBOTv2.Models
             /// <summary>
             /// Returns the local time of the location used for this request. (Example: 2019-09-07 08:14)
             /// </summary>
-            public string localtime { get; set; }
+            public string localtime { get; set; } = "";
 
             /// <summary>
             /// Returns the local time (as UNIX timestamp) of the location used for this request. (Example: 1567844040)
@@ -116,17 +116,17 @@ namespace LennyBOTv2.Models
             /// <summary>
             /// Returns the name of the location used for this request.
             /// </summary>
-            public string name { get; set; }
+            public string name { get; set; } = "";
 
             /// <summary>
             /// Returns the region name associated with the location used for this request.
             /// </summary>
-            public string region { get; set; }
+            public string region { get; set; } = "";
 
             /// <summary>
             /// Returns the timezone ID associated with the location used for this request. (Example: America/New_York)
             /// </summary>
-            public string timezone_id { get; set; }
+            public string timezone_id { get; set; } = "";
 
             /// <summary>
             /// Returns the UTC offset (in hours) of the timezone associated with the location used for this request. (Example: -4.0)
@@ -137,8 +137,8 @@ namespace LennyBOTv2.Models
         public class WeatherModel
         {
             public bool success { get; set; } = true;
-            public Current current { get; set; }
-            public Location location { get; set; }
+            public Current? current { get; set; }
+            public Location? location { get; set; }
         }
     }
 

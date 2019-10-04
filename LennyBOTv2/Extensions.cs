@@ -16,14 +16,7 @@ namespace LennyBOTv2
             Task.Run(async () =>
             {
                 await Task.Delay(seconds * 1000).ConfigureAwait(false);
-                try
-                {
-                    await msg.DeleteAsync().ConfigureAwait(false);
-                }
-                catch (Exception ex)
-                {
-                    await LoggingService.LogExceptionAsync(ex, "DeleteAfter").ConfigureAwait(false);
-                }
+                await msg.DeleteAsync().ConfigureAwait(false);
             });
             return msg;
         }
@@ -37,7 +30,7 @@ namespace LennyBOTv2
         public static SocketTextChannel GetNotificationChannel(this SocketCommandContext context)
         {
             var channelId = Convert.ToUInt64(LennyServiceProvider.Instance.Config["notificationChannel"]);
-            return context.Client.GetChannel(channelId) as SocketTextChannel;
+            return (SocketTextChannel)context.Client.GetChannel(channelId);
         }
 
         public static SocketUser GetOwner(this SocketCommandContext context)
@@ -61,14 +54,7 @@ namespace LennyBOTv2
             Task.Run(async () =>
             {
                 await Task.Delay(seconds * 1000).ConfigureAwait(false);
-                try
-                {
-                    await msg.ModifyAsync(x => x.Content = newContent).ConfigureAwait(false);
-                }
-                catch (Exception ex)
-                {
-                    await LoggingService.LogExceptionAsync(ex, "ModifyAfter").ConfigureAwait(false);
-                }
+                await msg.ModifyAsync(x => x.Content = newContent).ConfigureAwait(false);
             });
             return msg;
         }

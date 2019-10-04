@@ -70,20 +70,21 @@ $"{Format.Bold("Info")}\n"
             var ping = Context.Client.Latency;
             var embed = new EmbedBuilder()
                 .WithTitle(":ping_pong: Pong!")
-                .WithDescription($"Ping: {ping} ms\nExecution: {execution} ms");
+                .WithDescription($"Ping: {ping} ms\nExecution: {execution} ms")
+                .WithFooter($"Uptime: {GetUptime()}");
             await ReplyEmbedAsync(embed).ConfigureAwait(false);
         }
 
         [Command("avatar")]
-        public async Task UserAvatarAsync(SocketUser user = null)
+        public async Task UserAvatarAsync(SocketUser? user = null)
         {
-            user = user ?? Context.User;
+            user ??= Context.User;
             var avatar = user.GetAvatarUrl(size: 2048) ?? "This user has no avatar";
             await ReplyAsync(avatar).ConfigureAwait(false);
         }
 
         //private static string GetHeapSize() => Math.Round(GC.GetTotalMemory(true) / (1024.0 * 1024.0), 2).ToString();
 
-        //private static string GetUptime() => (DateTime.Now - Process.GetCurrentProcess().StartTime).ToString(@"dd\.hh\:mm\:ss");
+        private static string GetUptime() => (System.DateTime.Now - Process.GetCurrentProcess().StartTime).ToString(@"dd\.hh\:mm\:ss");
     }
 }

@@ -17,7 +17,7 @@ namespace LennyBOTv2
         private readonly DiscordSocketClient _client;
         private readonly CommandService _commands;
         private readonly IConfiguration _config;
-        private IServiceProvider _services;
+        private IServiceProvider? _services;
 
         public Program()
         {
@@ -84,7 +84,7 @@ namespace LennyBOTv2
             }
 
             var prefix = _config["prefix"];
-            int argPos = 0;
+            var argPos = 0;
             if (!(message.HasMentionPrefix(_client.CurrentUser, ref argPos) || message.HasStringPrefix(prefix, ref argPos))) return;
 
             ////ignore msg with prefix only - disabled as per request

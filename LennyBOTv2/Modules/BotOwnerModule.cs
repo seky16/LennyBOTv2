@@ -11,7 +11,7 @@ namespace LennyBOTv2.Modules
         [Command("botnick")]
         [IsBotOwner]
         public async Task BotNickCmdAsync([Remainder]string name)
-            => await Context?.Guild?.CurrentUser?.ModifyAsync(x => x.Nickname = name);
+            => await Context.Guild.CurrentUser.ModifyAsync(x => x.Nickname = name).ConfigureAwait(false);
 
         [Command("exit", RunMode = RunMode.Async)]
         [IsBotOwner]
@@ -25,8 +25,8 @@ namespace LennyBOTv2.Modules
 
         [Command("playing")]
         [IsBotOwner]
-        public Task PlayingCmdAsync([Remainder]string game)
-            => Context?.Client?.SetGameAsync(game);
+        public async Task PlayingCmdAsync([Remainder]string game)
+            => await Context.Client.SetGameAsync(game).ConfigureAwait(false);
 
         [Command("restart", RunMode = RunMode.Async)]
         [IsBotOwner]
@@ -37,12 +37,13 @@ namespace LennyBOTv2.Modules
             await Context.Client.LogoutAsync().ConfigureAwait(false);
             await Context.Client.LoginAsync(TokenType.Bot, Config["token"]).ConfigureAwait(false);
             await Context.Client.StartAsync().ConfigureAwait(false);
+            // TODO fix null ref exception?
             await msg.ModifyAsync(m => m.Content = "Restarted :white_check_mark:").ConfigureAwait(false);
         }
 
         [Command("say"), Alias("s")]
         [IsBotOwner]
-        public Task SayCmdAsync([Remainder]string text)
-            => ReplyAsync(text);
+        public async Task SayCmdAsync([Remainder]string text)
+            => await ReplyAsync(text).ConfigureAwait(false);
     }
 }

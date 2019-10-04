@@ -9,7 +9,7 @@ namespace LennyBOTv2.Modules
 {
     public class LennyModuleBase : InteractiveBase<SocketCommandContext>
     {
-        protected IConfiguration Config => LennyServiceProvider.Instance.Config;
+        protected static IConfiguration Config => LennyServiceProvider.Instance.Config;
 
         public Task<IUserMessage> ReplyEmbedAsync(Embed embed)
             => ReplyAsync("", false, embed, null);

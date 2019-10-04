@@ -104,7 +104,7 @@ Awards: {item.Awards}";
         [Command("urban")]
         public async Task UrbanCmdAsync([Remainder] string query)
         {
-            string jsonString = string.Empty;
+            var jsonString = string.Empty;
             using (var client = new HttpClient())
             {
                 var result = await client.GetAsync(string.Format("http://api.urbandictionary.com/v0/define?term={0}", query.Replace(' ', '+'))).ConfigureAwait(false);
@@ -117,7 +117,7 @@ Awards: {item.Awards}";
                 jsonString = await result.Content.ReadAsStringAsync().ConfigureAwait(false);
             }
             var urbanModel = UrbanModel.FromJson(jsonString);
-            if (urbanModel?.List?.Count == 0)
+            if (urbanModel?.List is null || urbanModel.List.Count == 0)
             {
                 await ReplyAsync($"There are no definitions for word: **{query}**.").ConfigureAwait(false);
                 return;
@@ -145,7 +145,7 @@ Awards: {item.Awards}";
         [Command("weather")]
         public async Task WeatherCmdAsync([Remainder]string query)
         {
-            string jsonString = string.Empty;
+            var jsonString = string.Empty;
             using (var client = new HttpClient())
             {
                 var result = await client.GetAsync(string.Format("http://api.weatherstack.com/current?access_key={1}&query={0}", query.Replace(' ', '+'), Config["weatherstackAPIkey"])).ConfigureAwait(false);
@@ -160,7 +160,7 @@ Awards: {item.Awards}";
 
             var model = JsonConvert.DeserializeObject<WeatherstackModel.WeatherModel>(jsonString);
 
-            if (!model.success)
+            if (!model.success || model.current is null || model.location is null)
             {
                 await Context.MarkCmdFailedAsync(jsonString).ConfigureAwait(false);
                 return;
@@ -169,62 +169,61 @@ Awards: {item.Awards}";
             var updatedOnUtc = DateTimeOffset.FromUnixTimeSeconds(model.location.localtime_epoch).AddHours(-model.location.utc_offset);
 
             var embed = new EmbedBuilder()
-    .WithTitle($"Weather in {model.location.name}, {model.location.region}, {model.location.country}")
-    .WithDescription($"{model.current.temperature} °C {model.current.weather_descriptions.FirstOrDefault()}")
-    .WithThumbnailUrl(model.current.weather_icons.FirstOrDefault())
-    .WithFooter($"Last update: {updatedOnUtc.ToPragueTimeString()}")
-    .WithAuthor(author => {
-        author
-            .WithName("weatherstack")
-            .WithUrl("https://weatherstack.com")
-            .WithIconUrl("https://weatherstack.com/site_images/weatherstack_icon.png");
-    })
-    .AddField("Details",
-    $"Feels like: {model.current.feelslike} °C\n" +
-    $"Cloud coverage: {model.current.cloudcover} %\n" +
-    $"Precipitation: {model.current.precip} mm\n" +
-    $"Humidity: {model.current.humidity} %\n" +
-    $"Pressure: {model.current.pressure} mBar\n" +
-    $"Wind: {model.current.wind_speed} km/h {model.current.wind_dir}");
+                .WithTitle($"Weather in {model.location.name}, {model.location.region}, {model.location.country}")
+                .WithDescription($"{model.current.temperature} °C {model.current.weather_descriptions.FirstOrDefault()}")
+                .WithThumbnailUrl(model.current.weather_icons.FirstOrDefault())
+                .WithFooter($"Last update: {updatedOnUtc.ToPragueTimeString()}")
+                .WithAuthor(author =>
+                {
+                    author
+                        .WithName("weatherstack")
+                        .WithUrl("https://weatherstack.com")
+                        .WithIconUrl("https://weatherstack.com/site_images/weatherstack_icon.png");
+                })
+                .AddField("Details",
+                $"Feels like: {model.current.feelslike} °C\n" +
+                $"Cloud coverage: {model.current.cloudcover} %\n" +
+                $"Precipitation: {model.current.precip} mm\n" +
+                $"Humidity: {model.current.humidity} %\n" +
+                $"Pressure: {model.current.pressure} mBar\n" +
+                $"Wind: {model.current.wind_speed} km/h {model.current.wind_dir}");
             await ReplyEmbedAsync(embed).ConfigureAwait(false);
         }
 
         [Command("wiki")]
         public async Task WikiCmdAsync([Remainder] string query)
         {
-            using (var client = new HttpClient())
+            using var client = new HttpClient();
+            var getResult = await client.GetAsync($"https://en.wikipedia.org/w/api.php?action=opensearch&search={ Uri.EscapeUriString(query)}").ConfigureAwait(false);
+
+            if (!getResult.IsSuccessStatusCode)
             {
-                var getResult = await client.GetAsync($"https://en.wikipedia.org/w/api.php?action=opensearch&search={ Uri.EscapeUriString(query)}").ConfigureAwait(false);
-
-                if (!getResult.IsSuccessStatusCode)
-                {
-                    await Context.MarkCmdFailedAsync($"Wikipedia API returned {getResult.StatusCode}").ConfigureAwait(false);
-                    return;
-                }
-
-                var getContent = await getResult.Content.ReadAsStringAsync().ConfigureAwait(false);
-                JArray responseObject = JsonConvert.DeserializeObject<JArray>(getContent);
-                var titles = responseObject[1].ToObject<List<string>>();
-                var descriptions = responseObject[2].ToObject<List<string>>();
-                var urls = responseObject[3].ToObject<List<string>>();
-
-                var pages = new List<string>();
-                for (int i = 0; i < titles.Count; i++)
-                {
-                    pages.Add(new StringBuilder()
-                    .Append("[**").Append(titles[i]).Append("**](").Append(urls[i]).AppendLine(")")
-                    .AppendLine(descriptions[i])
-                    .ToString());
-                }
-
-                var author = new EmbedAuthorBuilder()
-                    .WithName("Wikipedia")
-                    .WithIconUrl("https://upload.wikimedia.org/wikipedia/commons/d/de/Wikipedia_Logo_1.0.png")
-                    .WithUrl("https://en.wikipedia.org/wiki/Main_Page");
-                var msg = new PaginatedMessage() { Title = $"Search results for *{query}*", Author = author, Color = new Color(255, 255, 255), Pages = pages };
-
-                await PagedReplyAsync(msg, false).ConfigureAwait(false);
+                await Context.MarkCmdFailedAsync($"Wikipedia API returned {getResult.StatusCode}").ConfigureAwait(false);
+                return;
             }
+
+            var getContent = await getResult.Content.ReadAsStringAsync().ConfigureAwait(false);
+            var responseObject = JsonConvert.DeserializeObject<JArray>(getContent);
+            var titles = responseObject[1].ToObject<List<string>>();
+            var descriptions = responseObject[2].ToObject<List<string>>();
+            var urls = responseObject[3].ToObject<List<string>>();
+
+            var pages = new List<string>();
+            for (var i = 0; i < titles.Count; i++)
+            {
+                pages.Add(new StringBuilder()
+                .Append("[**").Append(titles[i]).Append("**](").Append(urls[i]).AppendLine(")")
+                .AppendLine(descriptions[i])
+                .ToString());
+            }
+
+            var author = new EmbedAuthorBuilder()
+                .WithName("Wikipedia")
+                .WithIconUrl("https://upload.wikimedia.org/wikipedia/commons/d/de/Wikipedia_Logo_1.0.png")
+                .WithUrl("https://en.wikipedia.org/wiki/Main_Page");
+            var msg = new PaginatedMessage() { Title = $"Search results for *{query}*", Author = author, Color = new Color(255, 255, 255), Pages = pages };
+
+            await PagedReplyAsync(msg, false).ConfigureAwait(false);
         }
 
         [Command("youtube"), Alias("yt")]
