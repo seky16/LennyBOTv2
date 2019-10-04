@@ -15,7 +15,7 @@ namespace LennyBOTv2
     {
         public static bool IsDebug = false;
         private readonly DiscordSocketClient _client;
-        private readonly CommandService _commands = new CommandService();
+        private readonly CommandService _commands;
         private readonly IConfiguration _config;
         private IServiceProvider _services;
 
@@ -29,6 +29,12 @@ namespace LennyBOTv2
             {
                 LogLevel = IsDebug ? LogSeverity.Debug : LogSeverity.Info,
                 MessageCacheSize = 1000
+            });
+            _commands = new CommandService(new CommandServiceConfig
+            {
+                DefaultRunMode = RunMode.Async,
+                CaseSensitiveCommands = false,
+                LogLevel = LogSeverity.Verbose
             });
             _config = BuildConfig();
         }
