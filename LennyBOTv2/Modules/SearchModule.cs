@@ -148,35 +148,44 @@ Awards: {item.Awards}";
             string jsonString = string.Empty;
             using (var client = new HttpClient())
             {
-                var result = await client.GetAsync(string.Format("https://api.apixu.com/v1/forecast.json?key={1}&q={0}", query.Replace(' ', '+'), Config["apixuAPIkey"])).ConfigureAwait(false);
+                var result = await client.GetAsync(string.Format("http://api.weatherstack.com/current?access_key={1}&query={0}", query.Replace(' ', '+'), Config["weatherstackAPIkey"])).ConfigureAwait(false);
                 if (!result.IsSuccessStatusCode)
                 {
-                    await Context.MarkCmdFailedAsync($"Apixu weather API returned {result.StatusCode}").ConfigureAwait(false);
+                    await Context.MarkCmdFailedAsync($"Weatherstack API returned {result.StatusCode}").ConfigureAwait(false);
                     return;
                 }
 
                 jsonString = await result.Content.ReadAsStringAsync().ConfigureAwait(false);
             }
 
-            var model = JsonConvert.DeserializeObject<ApixuWeatherModel.WeatherModel>(jsonString);
+            var model = JsonConvert.DeserializeObject<WeatherstackModel.WeatherModel>(jsonString);
+
+            if (!model.success)
+            {
+                await Context.MarkCmdFailedAsync(jsonString).ConfigureAwait(false);
+                return;
+            }
+
+            var updatedOnUtc = DateTimeOffset.FromUnixTimeSeconds(model.location.localtime_epoch).AddHours(-model.location.utc_offset);
+
             var embed = new EmbedBuilder()
-    .WithTitle($"Weather in {model.location.name}, {model.location.country}")
-    .WithDescription($"{model.current.temp_c} °C, {model.current.condition.text}")
-    .WithThumbnailUrl($"https:{model.current.condition.icon}")
-    .WithFooter($"Last update: {model.current.last_updated}")
-    /*.WithAuthor(author => {
+    .WithTitle($"Weather in {model.location.name}, {model.location.region}, {model.location.country}")
+    .WithDescription($"{model.current.temperature} °C {model.current.weather_descriptions.FirstOrDefault()}")
+    .WithThumbnailUrl(model.current.weather_icons.FirstOrDefault())
+    .WithFooter($"Last update: {updatedOnUtc.ToPragueTimeString()}")
+    .WithAuthor(author => {
         author
-            .WithName("APIXU")
-            .WithUrl("https://www.apixu.com")
-            .WithIconUrl("https://cdn.apixu.com/v4/images/logo.png");
-    })*/
+            .WithName("weatherstack")
+            .WithUrl("https://weatherstack.com")
+            .WithIconUrl("https://weatherstack.com/site_images/weatherstack_icon.png");
+    })
     .AddField("Details",
-    $"Feels like: {model.current.feelslike_c} °C\n" +
-    $"Cloud coverage: {model.current.cloud} %\n" +
-    $"Precipitation: {model.current.precip_mm} mm\n" +
+    $"Feels like: {model.current.feelslike} °C\n" +
+    $"Cloud coverage: {model.current.cloudcover} %\n" +
+    $"Precipitation: {model.current.precip} mm\n" +
     $"Humidity: {model.current.humidity} %\n" +
-    $"Pressure: {model.current.pressure_mb} mBar\n" +
-    $"Wind: {model.current.wind_kph} km/h {model.current.wind_dir}");
+    $"Pressure: {model.current.pressure} mBar\n" +
+    $"Wind: {model.current.wind_speed} km/h {model.current.wind_dir}");
             await ReplyEmbedAsync(embed).ConfigureAwait(false);
         }
 
