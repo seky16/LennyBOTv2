@@ -46,7 +46,10 @@ namespace LennyBOTv2
                 reason = $"(Reason: {reason})";
             var msg = $"{context.Guild}/{context.Channel}/{context.User.Username} '{context.Message.Content}' failed. {reason}";
             await LoggingService.LogErrorAsync(msg, "Command").ConfigureAwait(false);
+
+#if !DEBUG
             await context.GetNotificationChannel().SendMessageAsync($"{context.GetOwner().Mention}\n{msg}").ConfigureAwait(false);
+#endif
         }
 
         public static IMessage ModifyAfter(this IUserMessage msg, int seconds, string newContent)
