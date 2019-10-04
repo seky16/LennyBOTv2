@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System;
+using System.Text;
 using System.Threading.Tasks;
 using Discord.Commands;
 using Seky16.Extensions;
@@ -7,6 +8,14 @@ namespace LennyBOTv2.Modules
 {
     public class GeneralModule : LennyModuleBase
     {
+        [Command("clap")]
+        public async Task ClapCmdAsync([Remainder] string text)
+        {
+            var split = text.ToUpperInvariant().Split(" ", StringSplitOptions.RemoveEmptyEntries);
+            var clapped = string.Join(" :clap: ", split) + " :clap:";
+            await ReplyAsync(clapped).ConfigureAwait(false);
+        }
+
         [Command("decide")]
         public async Task DecideCmdAsync(params string[] args)
         {
@@ -14,7 +23,7 @@ namespace LennyBOTv2.Modules
         }
 
         [Command("emojify")]
-        public async Task EmojifyAsync([Remainder] string text)
+        public async Task EmojifyCmdAsync([Remainder] string text)
         {
             var stringBuilder = new StringBuilder();
             foreach (var ch in text.ToLowerInvariant())
