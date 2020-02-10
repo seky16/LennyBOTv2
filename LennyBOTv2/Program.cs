@@ -120,28 +120,28 @@ namespace LennyBOTv2
 
         #region Repetition
 
-        private readonly List<SocketUserMessage> lastMessages = new List<SocketUserMessage>();
-        private const int repetitionCount = 3;
+        private readonly List<SocketUserMessage> _lastMessages = new List<SocketUserMessage>();
+        private const int RepetitionCount = 3;
 
         private bool CheckForRepetition(SocketUserMessage msg)
         {
-            if (lastMessages.Count == 0)
+            if (_lastMessages.Count == 0)
             {
-                lastMessages.Add(msg);
+                _lastMessages.Add(msg);
                 return false;
             }
             else
             {
-                var lastMsg = lastMessages[lastMessages.Count - 1];
+                var lastMsg = _lastMessages[_lastMessages.Count - 1];
                 if (!(lastMsg.Author.Id != msg.Author.Id && lastMsg.Content.Equals(msg.Content, StringComparison.Ordinal)))
-                    lastMessages.Clear();
+                    _lastMessages.Clear();
 
-                lastMessages.Add(msg);
+                _lastMessages.Add(msg);
             }
 
-            if (lastMessages.Count >= repetitionCount)
+            if (_lastMessages.Count >= RepetitionCount)
             {
-                lastMessages.Clear();
+                _lastMessages.Clear();
                 return true;
             }
 
