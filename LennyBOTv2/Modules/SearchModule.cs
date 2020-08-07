@@ -19,6 +19,18 @@ namespace LennyBOTv2.Modules
     // todo: make a service?
     public class SearchModule : LennyModuleBase
     {
+        private readonly Dictionary<ulong, string> _weatherDefaults = new Dictionary<ulong, string>()
+        {
+            { 237996378293272576, "Rotterdam" }, // Sean
+            { 161053293513146371, "Villefontaine" }, // Gugu
+            { 239502997074345984, "Olomouc" }, // Lonxie
+            { 246370598421397506, "Olomouc" }, // seky16
+            { 263375481158500364, "Olomouc" }, // Dwarf
+            { 246997041480204288, "Brno" }, // Brain Damage
+            { 247826910934073355, "Brno" }, // Peter
+            { 247825199817424896, "Brno" }, // Daniel
+        };
+
         public SearchModule(AsyncOmdbClient omdb, YouTubeService youTube)
         {
             Omdb = omdb;
@@ -38,7 +50,7 @@ namespace LennyBOTv2.Modules
         }
 
         [Command("imdb", RunMode = RunMode.Async)]
-        public async Task ImdbCmdAsync([Remainder]string query)
+        public async Task ImdbCmdAsync([Remainder] string query)
         {
             var author = new EmbedAuthorBuilder()
                 .WithName("IMDb")
@@ -143,7 +155,19 @@ Awards: {item.Awards}";
         }
 
         [Command("weather")]
-        public async Task WeatherCmdAsync([Remainder]string query)
+        public async Task WeatherCmdAsync()
+        {
+            if (!_weatherDefaults.TryGetValue(Context.Message.Author.Id, out var location))
+            {
+                await Context.MarkCmdFailedAsync($"{Context.Message.Author.GetNickname()} ({Context.Message.Author.Id}) doesn't have default location set.").ConfigureAwait(false);
+                return;
+            }
+
+            await WeatherCmdAsync(location).ConfigureAwait(false);
+        }
+
+        [Command("weather")]
+        public async Task WeatherCmdAsync([Remainder] string query)
         {
             var jsonString = string.Empty;
             using (var client = new HttpClient())
@@ -227,7 +251,7 @@ Awards: {item.Awards}";
         }
 
         [Command("youtube"), Alias("yt")]
-        public async Task YouTubeCmdAsync([Remainder]string query)
+        public async Task YouTubeCmdAsync([Remainder] string query)
         {
             var request = YouTube.Search.List("snippet");
             request.Q = query;
