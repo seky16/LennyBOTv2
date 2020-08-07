@@ -11,9 +11,11 @@ namespace LennyBOTv2.Modules
         [Command("clap")]
         public async Task ClapCmdAsync([Remainder] string text)
         {
+            var clapped = $"{Context.Message.Author.GetNickname()}:{Environment.NewLine}";
             var split = text.ToUpperInvariant().Split(" ", StringSplitOptions.RemoveEmptyEntries);
-            var clapped = string.Join(" :clap: ", split) + " :clap:";
+            clapped += string.Join(" :clap: ", split) + " :clap:";
             await ReplyAsync(clapped).ConfigureAwait(false);
+            await Context.Message.DeleteAsync().ConfigureAwait(false);
         }
 
         [Command("decide")]
@@ -25,7 +27,8 @@ namespace LennyBOTv2.Modules
         [Command("emojify")]
         public async Task EmojifyCmdAsync([Remainder] string text)
         {
-            var stringBuilder = new StringBuilder();
+            var stringBuilder = new StringBuilder(Context.Message.Author.GetNickname());
+            stringBuilder.AppendLine(":");
             foreach (var ch in text.ToLowerInvariant())
             {
                 switch (ch)
