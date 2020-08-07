@@ -8,7 +8,7 @@ namespace LennyBOTv2.Services
 {
     public class TimerService
     {
-        private static readonly DateTime _festival = new DateTime(2020, 7, 18, 0, 0, 0, DateTimeKind.Utc);
+        private static readonly DateTime _festival = new DateTime(2021, 7, 16, 0, 0, 0, DateTimeKind.Utc);
 
         private static int _last = 0;
 
