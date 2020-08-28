@@ -130,5 +130,15 @@ namespace LennyBOTv2.Modules
             await ReplyAsync(stringBuilder.ToString()).ConfigureAwait(false);
             await Context.Message.DeleteAsync().ConfigureAwait(false);
         }
+
+        [Command("radical")]
+        public async Task RadicalCmdAsync([Remainder] string text)
+        {
+            var radical = $"{Context.Message.Author.GetNickname()}:{Environment.NewLine}";
+            var split = text.ToUpperInvariant().Split(" ", StringSplitOptions.RemoveEmptyEntries);
+            radical += string.Join(" :radicalmeme: ", split) + " :radicalmeme:";
+            await ReplyAsync(radical).ConfigureAwait(false);
+            await Context.Message.DeleteAsync().ConfigureAwait(false);
+        }
     }
 }
