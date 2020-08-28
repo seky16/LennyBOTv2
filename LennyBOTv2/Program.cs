@@ -71,6 +71,16 @@ namespace LennyBOTv2
 
         private async Task HandleMessage(SocketMessage rawMessage)
         {
+            if (rawMessage.Channel.Id == 239504532734869505)
+            {
+                await MsgCounterService.UpdateMsgCountAsync(rawMessage).ConfigureAwait(false);
+
+                if (MsgCounterService.MsgCount % 10_000 == 0)
+                {
+                    await rawMessage.Channel.SendMessageAsync($"🎉 {((SocketTextChannel)rawMessage.Channel).Mention} has {MsgCounterService.MsgCount:N0} messages 🎉 FeelsBirthdayMan ").ConfigureAwait(false);
+                }
+            }
+
             // Ignore system messages and messages from bots
             if (!(rawMessage is SocketUserMessage message)) return;
             if (message.Source != MessageSource.User) return;
@@ -120,8 +130,8 @@ namespace LennyBOTv2
 
         #region Repetition
 
-        private readonly List<SocketUserMessage> _lastMessages = new List<SocketUserMessage>();
         private const int RepetitionCount = 3;
+        private readonly List<SocketUserMessage> _lastMessages = new List<SocketUserMessage>();
 
         private bool CheckForRepetition(SocketUserMessage msg)
         {

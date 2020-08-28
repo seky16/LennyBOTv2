@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
 using LennyBOTv2.Preconditions;
+using LennyBOTv2.Services;
 
 namespace LennyBOTv2.Modules
 {
@@ -10,8 +11,15 @@ namespace LennyBOTv2.Modules
     {
         [Command("botnick")]
         [IsBotOwner]
-        public async Task BotNickCmdAsync([Remainder]string name)
+        public async Task BotNickCmdAsync([Remainder] string name)
             => await Context.Guild.CurrentUser.ModifyAsync(x => x.Nickname = name).ConfigureAwait(false);
+
+        [Command("count")]
+        [IsBotOwner]
+        public async Task CountMsgsAsync()
+        {
+            await ReplyAsync(MsgCounterService.MsgCount.ToString("N0")).ConfigureAwait(false);
+        }
 
         [Command("exit", RunMode = RunMode.Async)]
         [IsBotOwner]
@@ -25,7 +33,7 @@ namespace LennyBOTv2.Modules
 
         [Command("playing")]
         [IsBotOwner]
-        public async Task PlayingCmdAsync([Remainder]string game)
+        public async Task PlayingCmdAsync([Remainder] string game)
             => await Context.Client.SetGameAsync(game).ConfigureAwait(false);
 
         [Command("restart", RunMode = RunMode.Async)]
@@ -43,7 +51,7 @@ namespace LennyBOTv2.Modules
 
         [Command("say"), Alias("s")]
         [IsBotOwner]
-        public async Task SayCmdAsync([Remainder]string text)
+        public async Task SayCmdAsync([Remainder] string text)
             => await ReplyAsync(text).ConfigureAwait(false);
     }
 }
