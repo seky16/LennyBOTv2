@@ -4,6 +4,7 @@ using Discord.Commands;
 using Discord.WebSocket;
 using Google.Apis.Services;
 using Google.Apis.YouTube.v3;
+using LiteDB;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using OMDbApiNet;
@@ -28,6 +29,8 @@ namespace LennyBOTv2.Services
         }
 
         public IServiceProvider? ServiceProvider { get; private set; }
+
+        public static LiteDatabase OpenDB() => new LiteDatabase("Files/Lenny.db");
 
         public IServiceProvider Build(DiscordSocketClient client, IConfiguration config, CommandService commands)
         {
