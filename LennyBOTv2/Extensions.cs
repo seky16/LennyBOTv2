@@ -39,6 +39,9 @@ namespace LennyBOTv2
             return context.Client.GetUser(ownerId);
         }
 
+        public static bool HasRole(this IUser user, ulong roleId)
+                            => (user as IGuildUser)?.RoleIds.Contains(roleId) ?? false;
+
         public static async Task MarkCmdFailedAsync(this SocketCommandContext context, string reason = "")
         {
             await context.Message.AddReactionAsync(new Emoji("⚠")).ConfigureAwait(false);
