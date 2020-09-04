@@ -31,10 +31,15 @@ namespace LennyBOTv2.Modules
             Environment.Exit(0);
         }
 
+        [Command("listening")]
+        [IsBotOwner]
+        public async Task ListeningCmdAsync([Remainder] string name)
+            => await Context.Client.SetGameAsync(name, null, ActivityType.Listening).ConfigureAwait(false);
+
         [Command("playing")]
         [IsBotOwner]
-        public async Task PlayingCmdAsync([Remainder] string game)
-            => await Context.Client.SetGameAsync(game).ConfigureAwait(false);
+        public async Task PlayingCmdAsync([Remainder] string name)
+            => await Context.Client.SetGameAsync(name, null, ActivityType.Playing).ConfigureAwait(false);
 
         [Command("restart", RunMode = RunMode.Async)]
         [IsBotOwner]
@@ -53,5 +58,15 @@ namespace LennyBOTv2.Modules
         [IsBotOwner]
         public async Task SayCmdAsync([Remainder] string text)
             => await ReplyAsync(text).ConfigureAwait(false);
+
+        [Command("status")]
+        [IsBotOwner]
+        public async Task StatusCmdAsync([Remainder] string name)
+            => await Context.Client.SetGameAsync(name, null, ActivityType.CustomStatus).ConfigureAwait(false);
+
+        [Command("watching")]
+        [IsBotOwner]
+        public async Task WatchingCmdAsync([Remainder] string name)
+            => await Context.Client.SetGameAsync(name, null, ActivityType.Watching).ConfigureAwait(false);
     }
 }
