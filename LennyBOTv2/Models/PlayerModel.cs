@@ -2,7 +2,7 @@
 
 namespace LennyBOTv2.Models
 {
-    public class ImpostorModel
+    public class PlayerModel
     {
         public ulong Id { get; set; }
         public int Losses { get; set; }
