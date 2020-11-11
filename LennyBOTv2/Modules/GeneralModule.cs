@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Text;
 using System.Threading.Tasks;
+using Discord;
 using Discord.Commands;
 using Seky16.Extensions;
 
@@ -11,7 +12,7 @@ namespace LennyBOTv2.Modules
         [Command("clap")]
         public async Task ClapCmdAsync([Remainder] string text)
         {
-            var clapped = $"{Context.Message.Author.GetNickname()}:{Environment.NewLine}";
+            var clapped = $"{Context.Message.Author.Mention}:{Environment.NewLine}";
             var split = text.ToUpperInvariant().Split(" ", StringSplitOptions.RemoveEmptyEntries);
             clapped += string.Join(" :clap: ", split) + " :clap:";
             await ReplyAsync(clapped).ConfigureAwait(false);
@@ -27,7 +28,7 @@ namespace LennyBOTv2.Modules
         [Command("emojify")]
         public async Task EmojifyCmdAsync([Remainder] string text)
         {
-            var stringBuilder = new StringBuilder(Context.Message.Author.GetNickname());
+            var stringBuilder = new StringBuilder(Context.Message.Author.Mention);
             stringBuilder.AppendLine(":");
             foreach (var ch in text.ToLowerInvariant())
             {
@@ -134,9 +135,10 @@ namespace LennyBOTv2.Modules
         [Command("radical")]
         public async Task RadicalCmdAsync([Remainder] string text)
         {
-            var radical = $"{Context.Message.Author.GetNickname()}:{Environment.NewLine}";
+            var radical = $"{Context.Message.Author.Mention}:{Environment.NewLine}";
             var split = text.ToUpperInvariant().Split(" ", StringSplitOptions.RemoveEmptyEntries);
-            radical += string.Join(" :radicalmeme: ", split) + " :radicalmeme:";
+
+            radical += string.Join(" <:radicalmeme:269806756589207553> ", split) + " <:radicalmeme:269806756589207553>";
             await ReplyAsync(radical).ConfigureAwait(false);
             await Context.Message.DeleteAsync().ConfigureAwait(false);
         }
