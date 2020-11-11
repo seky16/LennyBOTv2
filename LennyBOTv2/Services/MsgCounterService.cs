@@ -9,9 +9,14 @@ namespace LennyBOTv2.Services
     {
         private static ulong _lastMsgId = 776056544114376704;
 
-        public static int MsgCount { get; private set; } = 621_715;
+        internal static int MsgCount { get; private set; } = 621_715;
 
-        public static async Task UpdateMsgCountAsync(SocketMessage rawMessage)
+        internal static void DecreaseCount()
+        {
+            MsgCount--;
+        }
+
+        internal static async Task UpdateMsgCountAsync(SocketMessage rawMessage)
         {
             var msgs = await rawMessage.Channel.GetMessagesAsync(_lastMsgId, Direction.After, int.MaxValue, CacheMode.AllowDownload).FlattenAsync().ConfigureAwait(false);
             MsgCount += msgs.Count();

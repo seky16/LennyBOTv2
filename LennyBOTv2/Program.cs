@@ -51,7 +51,8 @@ namespace LennyBOTv2
             _services = LennyServiceProvider.Instance.Build(_client, _config, _commands);
 
             await _commands.AddModulesAsync(Assembly.GetEntryAssembly(), _services).ConfigureAwait(false);
-            _client.MessageReceived += HandleMessage;
+            _client.MessageReceived += MessageReceived;
+            _client.MessageDeleted += MessageDeleted;
 
             await Task.Delay(-1).ConfigureAwait(false);
         }
@@ -69,7 +70,17 @@ namespace LennyBOTv2
             return new ConfigurationBuilder().SetBasePath(cwd).AddJsonFile(file).Build();
         }
 
-        private async Task HandleMessage(SocketMessage rawMessage)
+        private Task MessageDeleted(Cacheable<IMessage, ulong> msg, ISocketMessageChannel channel)
+        {
+            if (channel.Id == 239504532734869505)
+            {
+                MsgCounterService.DecreaseCount();
+            }
+
+            return Task.CompletedTask;
+        }
+
+        private async Task MessageReceived(SocketMessage rawMessage)
         {
             if (rawMessage.Channel.Id == 239504532734869505)
             {
