@@ -31,10 +31,7 @@ namespace LennyBOTv2.Services
                     break;
             }
 
-            var message = msg.Message ?? "";
-            var exception = !(msg.Exception is null) ? msg.Exception.ToString() : "";
-
-            Console.WriteLine($"{DateTime.Now,-19} [{msg.Severity,8}] {msg.Source}: {message} {exception}");
+            Console.WriteLine(msg.ToString());
             Console.ForegroundColor = cc;
 
             return Task.CompletedTask;
