@@ -149,22 +149,34 @@ namespace Discord.Addons.Interactive
 
         protected virtual Embed BuildEmbed()
         {
-            var builder = new EmbedBuilder()
-                .WithAuthor(_pager.Author)
-                .WithColor(_pager.Color)
-                .WithFooter(f => f.Text = string.Format(Options.FooterFormat, _page, _pages))
-                .WithTitle(_pager.Title);
+            var builder = new EmbedBuilder();
+
             if (_pager.Pages is IEnumerable<EmbedFieldBuilder> efb)
             {
                 builder.Fields = efb.Skip((_page - 1) * Options.FieldsPerPage).Take(Options.FieldsPerPage).ToList();
                 builder.Description = _pager.AlternateDescription;
             }
+            else if (_pager.Pages.ElementAt(_page - 1) is EmbedBuilder newBuilder)
+            {
+                // Build and then ToEmbedBuilder to prevent the original Embed being modified
+                builder = newBuilder.Build().ToEmbedBuilder();
+            }
+            else if (_pager.Pages.ElementAt(_page - 1) is Embed newEmbed)
+            {
+                builder = newEmbed.ToEmbedBuilder();
+            }
             else
             {
+                // For all other types use the type's own .ToString() function
                 builder.Description = _pager.Pages.ElementAt(_page - 1).ToString();
             }
 
-            return builder.Build();
+            return builder
+                .WithAuthor(builder.Author ?? _pager.Author)
+                .WithColor(builder.Color ?? _pager.Color)
+                .WithFooter(f => f.Text = $"{builder.Footer.Text}\n{string.Format(Options.FooterFormat, _page, _pages)}".Trim())
+                .WithTitle($"{_pager.Title}\n{builder.Title}".Trim())
+                .Build();
         }
 
         private async Task RenderAsync()
