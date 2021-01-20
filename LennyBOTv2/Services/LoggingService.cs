@@ -37,18 +37,18 @@ namespace LennyBOTv2.Services
             return Task.CompletedTask;
         }
 
-        public static Task LogCriticalAsync(string msg, string source = "") => LogAsync(new LogMessage(LogSeverity.Critical, source, msg));
+        public static Task LogCriticalAsync(string? msg, string? source = null) => LogAsync(new LogMessage(LogSeverity.Critical, source ?? string.Empty, msg ?? string.Empty));
 
-        public static Task LogDebugAsync(string msg, string source = "") => LogAsync(new LogMessage(LogSeverity.Debug, source, msg));
+        public static Task LogDebugAsync(string? msg, string? source = null) => LogAsync(new LogMessage(LogSeverity.Debug, source ?? string.Empty, msg ?? string.Empty));
 
-        public static Task LogErrorAsync(string msg, string source = "") => LogAsync(new LogMessage(LogSeverity.Error, source, msg));
+        public static Task LogErrorAsync(string? msg, string? source = null) => LogAsync(new LogMessage(LogSeverity.Error, source ?? string.Empty, msg ?? string.Empty));
 
-        public static Task LogExceptionAsync(Exception? ex, string source = "", string msg = "") => LogAsync(new LogMessage(LogSeverity.Error, source, msg, ex));
+        public static Task LogExceptionAsync(Exception? ex, string? source = null, string? msg = null) => LogAsync(new LogMessage(LogSeverity.Error, source ?? string.Empty, msg ?? string.Empty, ex));
 
-        public static Task LogInfoAsync(string msg, string source = "") => LogAsync(new LogMessage(LogSeverity.Info, source, msg));
+        public static Task LogInfoAsync(string? msg, string? source = null) => LogAsync(new LogMessage(LogSeverity.Info, source ?? string.Empty, msg ?? string.Empty));
 
-        public static Task LogVerboseAsync(string msg, string source = "") => LogAsync(new LogMessage(LogSeverity.Verbose, source, msg));
+        public static Task LogVerboseAsync(string? msg, string? source = null) => LogAsync(new LogMessage(LogSeverity.Verbose, source ?? string.Empty, msg ?? string.Empty));
 
-        public static Task LogWarningAsync(string msg, string source = "") => LogAsync(new LogMessage(LogSeverity.Warning, source, msg));
+        public static Task LogWarningAsync(string? msg, string? source = null) => LogAsync(new LogMessage(LogSeverity.Warning, source ?? string.Empty, msg ?? string.Empty));
     }
 }

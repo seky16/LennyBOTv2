@@ -101,6 +101,20 @@ namespace LennyBOTv2.Models.Weatherstack
         public double? WindSpeed { get; set; }
     }
 
+    public class Error
+    {
+        [JsonProperty("code")]
+        public int? Code { get; set; }
+
+        [JsonProperty("info")]
+        public string? Info { get; set; }
+
+        [JsonProperty("type")]
+        public string? Type { get; set; }
+
+        public override string ToString() => $"{Code}: {Info}";
+    }
+
     public class Location
     {
         /// <summary>
@@ -194,6 +208,13 @@ namespace LennyBOTv2.Models.Weatherstack
     {
         [JsonProperty("current")]
         public Current? Current { get; set; }
+
+        /// <summary>
+        /// Whenever an API request fails, the weatherstack API will return an error object in lightweight JSON format.
+        /// Each error object contains an error code, an error type and an info object containing details about the error that occurred.
+        /// </summary>
+        [JsonProperty("error")]
+        public Error? Error { get; set; }
 
         [JsonProperty("location")]
         public Location? Location { get; set; }

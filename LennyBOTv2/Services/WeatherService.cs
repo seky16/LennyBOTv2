@@ -1,12 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net.Http;
 using System.Threading.Tasks;
 using Discord;
 using LennyBOTv2.Models.Weatherstack;
 using Microsoft.Extensions.Configuration;
-using Newtonsoft.Json;
 
 namespace LennyBOTv2.Services
 {
@@ -31,13 +29,15 @@ namespace LennyBOTv2.Services
             _config = config;
         }
 
-        internal async Task<List<object?>> GetWeatherForLocationAsync(string location)
+        internal async Task<IEnumerable<object>> GetWeatherForLocationAsync(string location)
         {
             var result = new List<object?>
             {
                 await WeatherstackAsync(location).ConfigureAwait(false)
             };
-            return result;
+#pragma warning disable CS8619 // Nullability of reference types in value doesn't match target type.
+            return result.Where(obj => !(obj is null));
+#pragma warning restore CS8619 // Nullability of reference types in value doesn't match target type.
         }
 
         internal bool TryGetDefaultLocation(ulong id, out string location)
@@ -49,33 +49,13 @@ namespace LennyBOTv2.Services
 
         private async Task<object?> WeatherstackAsync(string location)
         {
-            var jsonString = string.Empty;
-            using (var client = new HttpClient())
-            {
-                var result = await client.GetAsync(string.Format("http://api.weatherstack.com/current?access_key={1}&query={0}", location.Replace(' ', '+'), _config["weatherstackAPIkey"])).ConfigureAwait(false);
-                if (!result.IsSuccessStatusCode)
-                {
-                    await LoggingService.LogErrorAsync($"Weatherstack API returned {result.StatusCode}", nameof(WeatherService)).ConfigureAwait(false);
-                    return null;
-                }
+            var apiKey = _config["weatherstackAPIkey"];
 
-                jsonString = await result.Content.ReadAsStringAsync().ConfigureAwait(false);
-            }
-
-            WeatherStackModel? model = null;
-            try
-            {
-                model = JsonConvert.DeserializeObject<WeatherStackModel>(jsonString);
-            }
-            catch (Exception ex)
-            {
-                await LoggingService.LogExceptionAsync(ex, nameof(WeatherService)).ConfigureAwait(false);
-                return null;
-            }
+            var model = await Helpers.GetFromJsonAsync<WeatherStackModel>($"http://api.weatherstack.com/current?access_key={apiKey}&query={location}").ConfigureAwait(false);
 
             if (model?.Current is null || model.Location is null || !model.Success)
             {
-                await LoggingService.LogErrorAsync(jsonString, nameof(WeatherService)).ConfigureAwait(false);
+                await LoggingService.LogErrorAsync(model?.Error?.ToString(), nameof(WeatherService)).ConfigureAwait(false);
                 return null;
             }
 
