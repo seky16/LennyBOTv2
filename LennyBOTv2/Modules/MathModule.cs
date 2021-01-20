@@ -11,7 +11,7 @@ namespace LennyBOTv2.Modules
     public class MathModule : LennyModuleBase
     {
         [Command("calc")]
-        public async Task CalcCmdAsync([Remainder]string expression)
+        public async Task CalcCmdAsync([Remainder] string expression)
         {
             expression = expression.Replace("`", string.Empty);
             var url = $"http://api.mathjs.org/v4/?expr={ Uri.EscapeDataString(expression)}";
@@ -29,7 +29,7 @@ namespace LennyBOTv2.Modules
         }
 
         [Command("conv")]
-        public async Task ConvCmdAsync(string amount, string from, [Remainder]string to)
+        public async Task ConvCmdAsync(string amount, string from, [Remainder] string to)
         {
             amount = amount.Replace(',', '.');
             if (!double.TryParse(amount, out var amountD))

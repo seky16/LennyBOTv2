@@ -21,8 +21,8 @@ namespace LennyBOTv2.Modules
     public class SearchModule : LennyModuleBase
     {
         private readonly AsyncOmdbClient _omdb;
-        private readonly YouTubeService _youTube;
         private readonly WeatherService _weather;
+        private readonly YouTubeService _youTube;
 
         public SearchModule(AsyncOmdbClient omdb, YouTubeService youTube, WeatherService weather)
         {
@@ -160,14 +160,14 @@ Awards: {item.Awards}";
         [Command("weather")]
         public async Task WeatherCmdAsync([Remainder] string location)
         {
-           var result = await _weather.GetWeatherForLocationAsync(location).ConfigureAwait(false);
+            var result = await _weather.GetWeatherForLocationAsync(location).ConfigureAwait(false);
 
-            if (result?.Any() != true)
+            if (result.Any())
             {
-                await Context.MarkCmdFailedAsync().ConfigureAwait(false);
+                await Context.MarkCmdFailedAsync("No results").ConfigureAwait(false);
             }
 
-            await PagedReplyAsync(result);
+            await PagedReplyAsync(result).ConfigureAwait(false);
         }
 
         [Command("wiki")]

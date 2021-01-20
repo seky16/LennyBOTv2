@@ -41,6 +41,15 @@ namespace LennyBOTv2.Services
             client.Disconnected += DisconnectedAsync;
         }
 
+        private static Task LogCriticalAsync(string message)
+            => LoggingService.LogCriticalAsync(message, logSource);
+
+        private static Task LogDebugAsync(string message)
+            => LoggingService.LogDebugAsync(message, logSource);
+
+        private static Task LogInfoAsync(string message)
+            => LoggingService.LogInfoAsync(message, logSource);
+
         private Task ConnectedAsync()
         {
             // Cancel all previous state checks and reset the CancelToken - client is back online
@@ -101,14 +110,5 @@ namespace LennyBOTv2.Services
             Environment.Exit(1);
 #pragma warning restore CS0162 // Unreachable code detected
         }
-
-        private static Task LogCriticalAsync(string message)
-            => LoggingService.LogCriticalAsync(message, logSource);
-
-        private static Task LogDebugAsync(string message)
-            => LoggingService.LogDebugAsync(message, logSource);
-
-        private static Task LogInfoAsync(string message)
-            => LoggingService.LogInfoAsync(message, logSource);
     }
 }
