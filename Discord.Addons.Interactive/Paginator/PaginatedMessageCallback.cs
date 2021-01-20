@@ -43,41 +43,44 @@ namespace Discord.Addons.Interactive
             var embed = BuildEmbed();
             var message = await Context.Channel.SendMessageAsync(_pager.Content, embed: embed).ConfigureAwait(false);
             Message = message;
-            Interactive.AddReactionCallback(message, this);
-            // Reactions take a while to add, don't wait for them
-            _ = Task.Run(async () =>
+
+            if (_pager.Pages?.Count() > 1)
             {
-                await message.AddReactionAsync(Options.First).ConfigureAwait(false);
-                await message.AddReactionAsync(Options.Back).ConfigureAwait(false);
-                await message.AddReactionAsync(Options.Next).ConfigureAwait(false);
-                await message.AddReactionAsync(Options.Last).ConfigureAwait(false);
-
-                var manageMessages = (Context.Channel is IGuildChannel guildChannel)
-                    ? (Context.User as IGuildUser)?.GetPermissions(guildChannel).ManageMessages ?? false
-                    : false;
-
-                if (Options.JumpDisplayOptions == JumpDisplayOptions.Always
-                    || (Options.JumpDisplayOptions == JumpDisplayOptions.WithManageMessages && manageMessages))
+                Interactive.AddReactionCallback(message, this);
+                // Reactions take a while to add, don't wait for them
+                _ = Task.Run(async () =>
                 {
-                    await message.AddReactionAsync(Options.Jump).ConfigureAwait(false);
-                }
+                    await message.AddReactionAsync(Options.First).ConfigureAwait(false);
+                    await message.AddReactionAsync(Options.Back).ConfigureAwait(false);
+                    await message.AddReactionAsync(Options.Next).ConfigureAwait(false);
+                    await message.AddReactionAsync(Options.Last).ConfigureAwait(false);
 
-                await message.AddReactionAsync(Options.Stop).ConfigureAwait(false);
+                    var manageMessages = (Context.Channel is IGuildChannel guildChannel)
+                        && ((Context.User as IGuildUser)?.GetPermissions(guildChannel).ManageMessages ?? false);
 
-                if (Options.DisplayInformationIcon)
-                {
-                    await message.AddReactionAsync(Options.Info).ConfigureAwait(false);
-                }
-            });
+                    if (Options.JumpDisplayOptions == JumpDisplayOptions.Always
+                        || (Options.JumpDisplayOptions == JumpDisplayOptions.WithManageMessages && manageMessages))
+                    {
+                        await message.AddReactionAsync(Options.Jump).ConfigureAwait(false);
+                    }
 
-            // TODO: (Next major version) timeouts need to be handled at the service-level!
-            if (Timeout.HasValue && Timeout.Value != null)
-            {
-                _ = Task.Delay(Timeout.Value).ContinueWith(_ =>
-                {
-                    Interactive.RemoveReactionCallback(message);
-                    _ = Message.DeleteAsync();
+                    await message.AddReactionAsync(Options.Stop).ConfigureAwait(false);
+
+                    if (Options.DisplayInformationIcon)
+                    {
+                        await message.AddReactionAsync(Options.Info).ConfigureAwait(false);
+                    }
                 });
+
+                // TODO: (Next major version) timeouts need to be handled at the service-level!
+                if (Timeout.HasValue)
+                {
+                    _ = Task.Delay(Timeout.Value).ContinueWith(_ =>
+                    {
+                        Interactive.RemoveReactionCallback(message);
+                        _ = Message.DeleteAsync();
+                    });
+                }
             }
         }
 
