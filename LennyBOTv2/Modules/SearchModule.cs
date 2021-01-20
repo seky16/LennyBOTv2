@@ -10,6 +10,7 @@ using Discord.Commands;
 using Google.Apis.YouTube.v3;
 using HtmlAgilityPack;
 using LennyBOTv2.Models;
+using LennyBOTv2.Services;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using OMDbApiNet;
@@ -19,26 +20,16 @@ namespace LennyBOTv2.Modules
     // todo: make a service?
     public class SearchModule : LennyModuleBase
     {
-        private readonly Dictionary<ulong, string> _weatherDefaults = new Dictionary<ulong, string>()
-        {
-            { 237996378293272576, "Rotterdam" }, // Sean
-            { 161053293513146371, "Villefontaine" }, // Gugu
-            { 239502997074345984, "Olomouc" }, // Lonxie
-            { 246370598421397506, "Olomouc" }, // seky16
-            { 263375481158500364, "Olomouc" }, // Dwarf
-            { 246997041480204288, "Brno" }, // Brain Damage
-            { 247826910934073355, "Brno" }, // Peter
-            { 247825199817424896, "Brno" }, // Daniel
-        };
+        private readonly AsyncOmdbClient _omdb;
+        private readonly YouTubeService _youTube;
+        private readonly WeatherService _weather;
 
-        public SearchModule(AsyncOmdbClient omdb, YouTubeService youTube)
+        public SearchModule(AsyncOmdbClient omdb, YouTubeService youTube, WeatherService weather)
         {
-            Omdb = omdb;
-            YouTube = youTube;
+            _omdb = omdb;
+            _youTube = youTube;
+            _weather = weather;
         }
-
-        public AsyncOmdbClient Omdb { get; }
-        public YouTubeService YouTube { get; }
 
         [Command("amd")]
         public async Task AmdCmdAsync()
@@ -56,7 +47,7 @@ namespace LennyBOTv2.Modules
                 .WithName("IMDb")
                 .WithIconUrl("http://files.softicons.com/download/social-media-icons/flat-gradient-social-icons-by-guilherme-lima/png/512x512/IMDb.png")
                 .WithUrl("https://www.imdb.com/");
-            var list = await Omdb.GetSearchListAsync(query).ConfigureAwait(false);
+            var list = await _omdb.GetSearchListAsync(query).ConfigureAwait(false);
             if (!string.IsNullOrEmpty(list.Error))
             {
                 await Context.MarkCmdFailedAsync($"OMDB: {list.Error}").ConfigureAwait(false);
@@ -64,7 +55,7 @@ namespace LennyBOTv2.Modules
             }
             if (list.SearchResults.Count == 1)
             {
-                var item = await Omdb.GetItemByIdAsync(list.SearchResults[0].ImdbId).ConfigureAwait(false);
+                var item = await _omdb.GetItemByIdAsync(list.SearchResults[0].ImdbId).ConfigureAwait(false);
                 var embed = new EmbedBuilder()
                     .WithColor(new Color(248, 231, 28))
                     .WithCurrentTimestamp()
@@ -84,7 +75,7 @@ namespace LennyBOTv2.Modules
             var pages = new List<string>();
             foreach (var result in list.SearchResults)
             {
-                var item = await Omdb.GetItemByIdAsync(result.ImdbId).ConfigureAwait(false);
+                var item = await _omdb.GetItemByIdAsync(result.ImdbId).ConfigureAwait(false);
                 var str = $@"[**{item.Title} ({item.Year})**](https://www.imdb.com/title/{ item.ImdbId})
 {item.Plot} ({item.Runtime})
 **Rating**
@@ -157,7 +148,7 @@ Awards: {item.Awards}";
         [Command("weather")]
         public async Task WeatherCmdAsync()
         {
-            if (!_weatherDefaults.TryGetValue(Context.Message.Author.Id, out var location))
+            if (!_weather.TryGetDefaultLocation(Context.Message.Author.Id, out var location))
             {
                 await Context.MarkCmdFailedAsync($"{Context.Message.Author.GetNickname()} ({Context.Message.Author.Id}) doesn't have default location set.").ConfigureAwait(false);
                 return;
@@ -167,51 +158,16 @@ Awards: {item.Awards}";
         }
 
         [Command("weather")]
-        public async Task WeatherCmdAsync([Remainder] string query)
+        public async Task WeatherCmdAsync([Remainder] string location)
         {
-            var jsonString = string.Empty;
-            using (var client = new HttpClient())
-            {
-                var result = await client.GetAsync(string.Format("http://api.weatherstack.com/current?access_key={1}&query={0}", query.Replace(' ', '+'), Config["weatherstackAPIkey"])).ConfigureAwait(false);
-                if (!result.IsSuccessStatusCode)
-                {
-                    await Context.MarkCmdFailedAsync($"Weatherstack API returned {result.StatusCode}").ConfigureAwait(false);
-                    return;
-                }
+           var result = await _weather.GetWeatherForLocationAsync(location).ConfigureAwait(false);
 
-                jsonString = await result.Content.ReadAsStringAsync().ConfigureAwait(false);
+            if (result?.Any() != true)
+            {
+                await Context.MarkCmdFailedAsync().ConfigureAwait(false);
             }
 
-            var model = JsonConvert.DeserializeObject<WeatherstackModel.WeatherModel>(jsonString);
-
-            if (!model.success || model.current is null || model.location is null)
-            {
-                await Context.MarkCmdFailedAsync(jsonString).ConfigureAwait(false);
-                return;
-            }
-
-            var updatedOnUtc = DateTimeOffset.FromUnixTimeSeconds(model.location.localtime_epoch).AddHours(-model.location.utc_offset);
-
-            var embed = new EmbedBuilder()
-                .WithTitle($"Weather in {model.location.name}, {model.location.region}, {model.location.country}")
-                .WithDescription($"{model.current.temperature} °C {model.current.weather_descriptions.FirstOrDefault()}")
-                .WithThumbnailUrl(model.current.weather_icons.FirstOrDefault())
-                .WithFooter($"Last update: {updatedOnUtc.ToPragueTimeString()}")
-                .WithAuthor(author =>
-                {
-                    author
-                        .WithName("weatherstack")
-                        .WithUrl("https://weatherstack.com")
-                        .WithIconUrl("https://weatherstack.com/site_images/weatherstack_icon.png");
-                })
-                .AddField("Details",
-                $"Feels like: {model.current.feelslike} °C\n" +
-                $"Cloud coverage: {model.current.cloudcover} %\n" +
-                $"Precipitation: {model.current.precip} mm\n" +
-                $"Humidity: {model.current.humidity} %\n" +
-                $"Pressure: {model.current.pressure} mBar\n" +
-                $"Wind: {model.current.wind_speed} km/h {model.current.wind_dir}");
-            await ReplyEmbedAsync(embed).ConfigureAwait(false);
+            await PagedReplyAsync(result);
         }
 
         [Command("wiki")]
@@ -253,7 +209,7 @@ Awards: {item.Awards}";
         [Command("youtube"), Alias("yt")]
         public async Task YouTubeCmdAsync([Remainder] string query)
         {
-            var request = YouTube.Search.List("snippet");
+            var request = _youTube.Search.List("snippet");
             request.Q = query;
             request.MaxResults = 1;
             request.SafeSearch = SearchResource.ListRequest.SafeSearchEnum.None;

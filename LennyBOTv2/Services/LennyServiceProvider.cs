@@ -46,6 +46,7 @@ namespace LennyBOTv2.Services
                 .AddSingleton(new YouTubeService(new BaseClientService.Initializer() { ApiKey = config["youtubeAPIkey"], ApplicationName = "LennyBOT" }))
                 .AddSingleton(new TimerService(client))
                 .AddSingleton<AmongUsService>()
+                .AddSingleton<WeatherService>()
 
                 .BuildServiceProvider();
 
