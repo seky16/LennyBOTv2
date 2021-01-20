@@ -200,5 +200,11 @@ namespace LennyBOTv2.Models.Weatherstack
 
         [JsonProperty("request")]
         public Request? Request { get; set; }
+
+        /// <summary>
+        /// https://weatherstack.com/documentation#api_error_codes
+        /// </summary>
+        [JsonProperty("success")]
+        public bool Success { get; set; } = true;
     }
 }

@@ -73,9 +73,9 @@ namespace LennyBOTv2.Services
                 return null;
             }
 
-            if (model?.Current is null || model.Location is null)
+            if (model?.Current is null || model.Location is null || !model.Success)
             {
-                await LoggingService.LogErrorAsync($"Can't deserialize '{jsonString}'", nameof(WeatherService)).ConfigureAwait(false);
+                await LoggingService.LogErrorAsync(jsonString, nameof(WeatherService)).ConfigureAwait(false);
                 return null;
             }
 
@@ -105,7 +105,7 @@ namespace LennyBOTv2.Services
                 $"Humidity: {model.Current.Humidity} %\n" +
                 $"Pressure: {model.Current.Pressure} mBar\n" +
                 $"Wind: {model.Current.WindSpeed} km/h {model.Current.WindDir}\n" +
-                $"UV Index: {model.Current.UVIndex}\n"+
+                $"UV Index: {model.Current.UVIndex}\n" +
                 $"Visibility: {model.Current.Visibility} km");
         }
     }
