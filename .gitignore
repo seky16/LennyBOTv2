@@ -259,7 +259,6 @@ paket-files/
 # Python Tools for Visual Studio (PTVS)
 __pycache__/
 *.pyc
-Discord\.Addons\.Interactive/
 
 LennyBOTv2/Files/config\.json
 
