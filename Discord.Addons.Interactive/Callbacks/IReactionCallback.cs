@@ -7,10 +7,10 @@ namespace Discord.Addons.Interactive
 {
     public interface IReactionCallback
     {
-        RunMode RunMode { get; }
-        ICriterion<SocketReaction> Criterion { get; }
-        TimeSpan? Timeout { get; }
         SocketCommandContext Context { get; }
+        ICriterion<SocketReaction> Criterion { get; }
+        RunMode RunMode { get; }
+        TimeSpan? Timeout { get; }
 
         Task<bool> HandleCallbackAsync(SocketReaction reaction);
     }

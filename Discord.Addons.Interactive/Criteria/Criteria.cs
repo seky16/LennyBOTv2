@@ -6,7 +6,7 @@ namespace Discord.Addons.Interactive
 {
     public class Criteria<T> : ICriterion<T>
     {
-        private List<ICriterion<T>> _critiera = new List<ICriterion<T>>();
+        private readonly List<ICriterion<T>> _critiera = new List<ICriterion<T>>();
 
         public Criteria<T> AddCriterion(ICriterion<T> criterion)
         {
@@ -19,7 +19,10 @@ namespace Discord.Addons.Interactive
             foreach (var criterion in _critiera)
             {
                 var result = await criterion.JudgeAsync(sourceContext, parameter).ConfigureAwait(false);
-                if (!result) return false;
+                if (!result)
+                {
+                    return false;
+                }
             }
             return true;
         }
