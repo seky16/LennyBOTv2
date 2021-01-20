@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Discord;
+using LennyBOTv2.Models.OpenWeatherMap;
 using LennyBOTv2.Models.Weatherstack;
 using Microsoft.Extensions.Configuration;
 
@@ -33,8 +34,10 @@ namespace LennyBOTv2.Services
         {
             var result = new List<object?>
             {
-                await WeatherstackAsync(location).ConfigureAwait(false)
+                await OpenWeatherMapAsync(location).ConfigureAwait(false),
+                await WeatherstackAsync(location).ConfigureAwait(false),
             };
+
 #pragma warning disable CS8619 // Nullability of reference types in value doesn't match target type.
             return result.Where(obj => !(obj is null));
 #pragma warning restore CS8619 // Nullability of reference types in value doesn't match target type.
@@ -45,6 +48,39 @@ namespace LennyBOTv2.Services
 #pragma warning disable CS8601 // Possible null reference assignment.
             return _weatherDefaults.TryGetValue(id, out location);
 #pragma warning restore CS8601 // Possible null reference assignment.
+        }
+
+        private async Task<object?> OpenWeatherMapAsync(string location)
+        {
+            var apiKey = _config["openWeatherMapAPIkey"];
+            var model = await Helpers.GetFromXmlAsync<OpenWeatherMapModel>($"https://api.openweathermap.org/data/2.5/weather?appid={apiKey}&q={location}&units=metric&mode=xml").ConfigureAwait(false);
+
+            if (model is null)
+                return null;
+
+            var updatedOnUtc = model.Lastupdate?.Value.Equals(default(DateTime)) ?? true ? DateTime.UtcNow : DateTime.SpecifyKind(model.Lastupdate.Value, DateTimeKind.Utc);
+
+            return new EmbedBuilder()
+                .WithTitle($"Weather in {model.City?.Name ?? location}, {model.City?.Country}")
+                .WithDescription($"{model.Temperature?.Value} °C (min: {model.Temperature?.Min} °C; max: {model.Temperature?.Max} °C) {model.Weather?.Value}")
+                .WithThumbnailUrl($"https://openweathermap.org/img/wn/{model.Weather?.Icon}@2x.png")
+                .WithFooter($"Last update: {updatedOnUtc.ToPragueTimeString()}")
+                .WithAuthor(author =>
+                {
+                    author
+                        .WithName("OpenWeather")
+                        .WithUrl("https://openweathermap.org/")
+                        .WithIconUrl("https://openweathermap.org/themes/openweathermap/assets/vendor/owm/img/icons/logo_60x60.png");
+                })
+                .AddField("More info",
+                $"Feels like: {model.FeelsLike?.Value} °C\n" +
+                $"Cloud coverage: {model.Clouds?.Value} % ({model.Clouds?.Name})\n" +
+                $"Precipitation: {model.Precipitation?.Value} mm\n" +
+                $"Humidity: {model.Humidity?.Value} {model.Humidity?.Unit}\n" +
+                $"Pressure: {model.Pressure?.Value} {model.Pressure?.Unit}\n" +
+                $"Wind: {model.Wind?.Speed?.Value} {model.Wind?.Speed?.Unit} {model.Wind?.Direction?.Code} ({model.Wind?.Speed?.Name})\n" +
+                $"Visibility: {model.Visibility?.Value / 1000.0} km\n" +
+                $"Sunrise/sunset: {model.City?.Sun?.Rise.AddSeconds(model.City?.Timezone ?? 0).TimeOfDay} / {model.City?.Sun?.Set.AddSeconds(model.City?.Timezone ?? 0).TimeOfDay} (local)\n");
         }
 
         private async Task<object?> WeatherstackAsync(string location)
@@ -78,15 +114,15 @@ namespace LennyBOTv2.Services
                         .WithUrl("https://weatherstack.com")
                         .WithIconUrl("https://weatherstack.com/site_images/weatherstack_icon.png");
                 })
-                .AddField("Details",
+                .AddField("More info",
                 $"Feels like: {model.Current.Feelslike} °C\n" +
                 $"Cloud coverage: {model.Current.Cloudcover} %\n" +
                 $"Precipitation: {model.Current.Precip} mm\n" +
                 $"Humidity: {model.Current.Humidity} %\n" +
                 $"Pressure: {model.Current.Pressure} mBar\n" +
                 $"Wind: {model.Current.WindSpeed} km/h {model.Current.WindDir}\n" +
-                $"UV Index: {model.Current.UVIndex}\n" +
-                $"Visibility: {model.Current.Visibility} km");
+                $"Visibility: {model.Current.Visibility} km\n") +
+                $"UV Index: {model.Current.UVIndex}";
         }
     }
 }

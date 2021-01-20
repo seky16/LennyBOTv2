@@ -162,9 +162,10 @@ Awards: {item.Awards}";
         {
             var result = await _weather.GetWeatherForLocationAsync(location).ConfigureAwait(false);
 
-            if (result.Any())
+            if (!result.Any())
             {
                 await Context.MarkCmdFailedAsync("No results").ConfigureAwait(false);
+                return;
             }
 
             await PagedReplyAsync(result).ConfigureAwait(false);

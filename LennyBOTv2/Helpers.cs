@@ -1,7 +1,9 @@
 ﻿using System;
+using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
+using System.Xml.Serialization;
 using LennyBOTv2.Services;
 using Newtonsoft.Json;
 
@@ -36,8 +38,57 @@ namespace LennyBOTv2
 
         public static async Task<T?> GetFromJsonAsync<T>(FormattableString url) where T : class
         {
+            var jsonStr = await GetStringAsync(url).ConfigureAwait(false);
+
+            if (string.IsNullOrEmpty(jsonStr))
+            {
+                await LoggingService.LogErrorAsync($"'{url}' returned empty string", nameof(GetFromJsonAsync)).ConfigureAwait(false);
+                return null;
+            }
+
+            T? model;
+            try
+            {
+                model = JsonConvert.DeserializeObject<T>(jsonStr);
+            }
+            catch (Exception ex)
+            {
+                await LoggingService.LogExceptionAsync(ex, typeof(T).Name, jsonStr).ConfigureAwait(false);
+                return null;
+            }
+
+            return model;
+        }
+
+        public static async Task<T?> GetFromXmlAsync<T>(FormattableString url) where T : class
+        {
+            var xmlStr = await GetStringAsync(url).ConfigureAwait(false);
+
+            if (string.IsNullOrEmpty(xmlStr))
+            {
+                await LoggingService.LogErrorAsync($"'{url}' returned empty string", nameof(GetFromJsonAsync)).ConfigureAwait(false);
+                return null;
+            }
+
+            T? model;
+            try
+            {
+                var serializer = new XmlSerializer(typeof(T));
+                using var reader = new StringReader(xmlStr);
+                model = serializer.Deserialize(reader) as T;
+            }
+            catch (Exception ex)
+            {
+                await LoggingService.LogExceptionAsync(ex, typeof(T).Name, xmlStr).ConfigureAwait(false);
+                return null;
+            }
+
+            return model;
+        }
+
+        public static async Task<string?> GetStringAsync(FormattableString url)
+        {
             var safeUrl = BuildSafeUrl(url);
-            var jsonString = string.Empty;
 
             using var client = new HttpClient();
             var result = await client.GetAsync(safeUrl).ConfigureAwait(false);
@@ -47,20 +98,7 @@ namespace LennyBOTv2
                 return null;
             }
 
-            jsonString = await result.Content.ReadAsStringAsync().ConfigureAwait(false);
-
-            T? model = null;
-            try
-            {
-                model = JsonConvert.DeserializeObject<T>(jsonString);
-            }
-            catch (Exception ex)
-            {
-                await LoggingService.LogExceptionAsync(ex, typeof(T).Name, jsonString).ConfigureAwait(false);
-                return null;
-            }
-
-            return model;
+            return await result.Content.ReadAsStringAsync().ConfigureAwait(false);
         }
     }
 }
