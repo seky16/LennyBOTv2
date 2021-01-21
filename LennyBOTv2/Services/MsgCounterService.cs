@@ -7,9 +7,9 @@ namespace LennyBOTv2.Services
 {
     internal static class MsgCounterService
     {
-        private static ulong _lastMsgId = 776056544114376704;
+        private static ulong _lastMsgId = 801608614518194196;
 
-        internal static int MsgCount { get; private set; } = 621_715;
+        internal static int MsgCount { get; private set; } = 644_759;
 
         internal static void DecreaseCount()
         {
