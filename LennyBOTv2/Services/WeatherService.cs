@@ -121,8 +121,8 @@ namespace LennyBOTv2.Services
                 $"Humidity: {model.Current.Humidity} %\n" +
                 $"Pressure: {model.Current.Pressure} mBar\n" +
                 $"Wind: {model.Current.WindSpeed} km/h {model.Current.WindDir}\n" +
-                $"Visibility: {model.Current.Visibility} km\n") +
-                $"UV Index: {model.Current.UVIndex}";
+                $"Visibility: {model.Current.Visibility} km\n" +
+                $"UV Index: {model.Current.UVIndex}");
         }
     }
 }

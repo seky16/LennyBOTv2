@@ -177,7 +177,7 @@ namespace Discord.Addons.Interactive
             return builder
                 .WithAuthor(builder.Author ?? _pager.Author)
                 .WithColor(builder.Color ?? _pager.Color)
-                .WithFooter(f => f.Text = $"{builder.Footer.Text}\n{string.Format(Options.FooterFormat, _page, _pages)}".Trim())
+                .WithFooter(f => f.Text = $"{builder.Footer?.Text}\n{string.Format(Options.FooterFormat, _page, _pages)}".Trim())
                 .WithTitle($"{_pager.Title}\n{builder.Title}".Trim())
                 .Build();
         }

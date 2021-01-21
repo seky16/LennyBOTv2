@@ -104,7 +104,7 @@ Awards: {item.Awards}";
         public Task LmgtfyCmdAsync([Remainder] string search = "How to use Lmgtfy")
             => ReplyAsync($"**Your special URL: **<http://lmgtfy.com/?q={ Uri.EscapeUriString(search)}>");
 
-        [Command("urban")]
+        [Command("urban", RunMode = RunMode.Async)]
         public async Task UrbanCmdAsync([Remainder] string query)
         {
             var jsonString = string.Empty;
@@ -145,7 +145,7 @@ Awards: {item.Awards}";
             await PagedReplyAsync(msg, false).ConfigureAwait(false);
         }
 
-        [Command("weather")]
+        [Command("weather", RunMode = RunMode.Async)]
         public async Task WeatherCmdAsync()
         {
             if (!_weather.TryGetDefaultLocation(Context.Message.Author.Id, out var location))
@@ -157,7 +157,7 @@ Awards: {item.Awards}";
             await WeatherCmdAsync(location).ConfigureAwait(false);
         }
 
-        [Command("weather")]
+        [Command("weather", RunMode = RunMode.Async)]
         public async Task WeatherCmdAsync([Remainder] string location)
         {
             var result = await _weather.GetWeatherForLocationAsync(location).ConfigureAwait(false);
@@ -171,7 +171,7 @@ Awards: {item.Awards}";
             await PagedReplyAsync(result).ConfigureAwait(false);
         }
 
-        [Command("wiki")]
+        [Command("wiki", RunMode = RunMode.Async)]
         public async Task WikiCmdAsync([Remainder] string query)
         {
             using var client = new HttpClient();
@@ -207,7 +207,7 @@ Awards: {item.Awards}";
             await PagedReplyAsync(msg, false).ConfigureAwait(false);
         }
 
-        [Command("youtube"), Alias("yt")]
+        [Command("youtube", RunMode = RunMode.Async), Alias("yt")]
         public async Task YouTubeCmdAsync([Remainder] string query)
         {
             var request = _youTube.Search.List("snippet");
