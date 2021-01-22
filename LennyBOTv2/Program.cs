@@ -72,7 +72,7 @@ namespace LennyBOTv2
 
         private Task MessageDeleted(Cacheable<IMessage, ulong> msg, ISocketMessageChannel channel)
         {
-            if (channel.Id == 239504532734869505)
+            if (channel.Id == Convert.ToUInt64(_config["msgCounter:channelId"]))
             {
                 MsgCounterService.DecreaseCount();
             }
@@ -82,7 +82,7 @@ namespace LennyBOTv2
 
         private async Task MessageReceived(SocketMessage rawMessage)
         {
-            if (rawMessage.Channel.Id == 239504532734869505)
+            if (rawMessage.Channel.Id == Convert.ToUInt64(_config["msgCounter:channelId"]))
             {
                 await MsgCounterService.UpdateMsgCountAsync(rawMessage).ConfigureAwait(false);
 
