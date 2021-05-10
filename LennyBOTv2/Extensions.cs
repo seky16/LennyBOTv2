@@ -21,7 +21,7 @@ namespace LennyBOTv2
             return msg;
         }
 
-        public static async Task<IMessage> GetLastMessageAsync(this ITextChannel channel)
+        public static async Task<IMessage?> GetLastMessageAsync(this ITextChannel channel)
             => (await channel.GetMessagesAsync(1).FlattenAsync().ConfigureAwait(false)).FirstOrDefault();
 
         public static string GetNickname(this IUser user)

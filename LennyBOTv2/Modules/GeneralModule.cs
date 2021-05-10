@@ -3,12 +3,20 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Discord.Commands;
-using Seky16.Extensions;
+
+//using Seky16.Extensions;
 
 namespace LennyBOTv2.Modules
 {
     public class GeneralModule : LennyModuleBase
     {
+        private readonly Random _random;
+
+        public GeneralModule(Random random)
+        {
+            _random = random;
+        }
+
         [Command("clap")]
         public async Task ClapCmdAsync([Remainder] string text)
         {
@@ -22,7 +30,13 @@ namespace LennyBOTv2.Modules
         [Command("decide")]
         public async Task DecideCmdAsync(params string[] args)
         {
-            await ReplyAsync(args.Random()).ConfigureAwait(false);
+            if (args?.Any() != true)
+            {
+                await Context.MarkCmdFailedAsync("No arguments given").ConfigureAwait(false);
+                return;
+            }
+
+            await ReplyAsync(args[_random.Next(args.Length)]).ConfigureAwait(false);
         }
 
         [Command("emojify")]

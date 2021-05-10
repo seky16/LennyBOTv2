@@ -47,6 +47,7 @@ namespace LennyBOTv2.Services
                 .AddSingleton(new TimerService(client, config))
                 .AddSingleton<AmongUsService>()
                 .AddSingleton<WeatherService>()
+                .AddSingleton<Random>()
 
                 .BuildServiceProvider();
 

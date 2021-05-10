@@ -185,16 +185,16 @@ Awards: {item.Awards}";
 
             var getContent = await getResult.Content.ReadAsStringAsync().ConfigureAwait(false);
             var responseObject = JsonConvert.DeserializeObject<JArray>(getContent);
-            var titles = responseObject[1].ToObject<List<string>>();
-            var descriptions = responseObject[2].ToObject<List<string>>();
-            var urls = responseObject[3].ToObject<List<string>>();
+            var titles = responseObject?[1].ToObject<List<string>>();
+            var descriptions = responseObject?[2].ToObject<List<string>>();
+            var urls = responseObject?[3].ToObject<List<string>>();
 
             var pages = new List<string>();
-            for (var i = 0; i < titles.Count; i++)
+            for (var i = 0; i < titles?.Count; i++)
             {
                 pages.Add(new StringBuilder()
-                .Append("[**").Append(titles[i]).Append("**](").Append(urls[i]).AppendLine(")")
-                .AppendLine(descriptions[i])
+                .Append("[**").Append(titles[i]).Append("**](").Append(urls?[i]).AppendLine(")")
+                .AppendLine(descriptions?[i])
                 .ToString());
             }
 

@@ -104,8 +104,8 @@ namespace LennyBOTv2.Services
 
             return new EmbedBuilder()
                 .WithTitle($"Weather in {model.Location.Name}, {model.Location.Region}, {model.Location.Country}")
-                .WithDescription($"{model.Current.Temperature} °C {model.Current.WeatherDescriptions.FirstOrDefault()}")
-                .WithThumbnailUrl(model.Current.WeatherIcons.FirstOrDefault())
+                .WithDescription($"{model.Current.Temperature} °C {model.Current.WeatherDescriptions?.FirstOrDefault()}")
+                .WithThumbnailUrl(model.Current.WeatherIcons?.FirstOrDefault())
                 .WithFooter($"Last update: {updatedOnUtc.ToPragueTimeString()}")
                 .WithAuthor(author =>
                 {
