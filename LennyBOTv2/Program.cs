@@ -28,7 +28,8 @@ namespace LennyBOTv2
             _client = new DiscordSocketClient(new DiscordSocketConfig
             {
                 LogLevel = IsDebug ? LogSeverity.Debug : LogSeverity.Info,
-                MessageCacheSize = 1000
+                MessageCacheSize = 1000,
+                AlwaysDownloadUsers = true,
             });
             _commands = new CommandService(new CommandServiceConfig
             {

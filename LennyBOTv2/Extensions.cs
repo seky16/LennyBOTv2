@@ -68,21 +68,22 @@ namespace LennyBOTv2
         // todo: rewrite?
         public static string ToPragueTimeString(this DateTime dateTime)
         {
-            var utcDateTime = dateTime.ToUniversalTime();
-            var instant = Instant.FromDateTimeUtc(utcDateTime);
-            var zone = DateTimeZoneProviders.Tzdb["Europe/Prague"];
-            var date = new ZonedDateTime(instant, zone);
+            var date = dateTime.ToUniversalTime().UtcToPragueZonedDateTime();
             return $"{date.Day:D2}.{date.Month:D2}.{date.Year:D4} {date.Hour:D2}:{date.Minute:D2}:{date.Second:D2}";
         }
 
         // todo: rewrite?
         public static string ToPragueTimeString(this DateTimeOffset dateTimeOffset)
         {
-            var utcDateTime = dateTimeOffset.UtcDateTime;
+            var date = dateTimeOffset.UtcDateTime.UtcToPragueZonedDateTime();
+            return $"{date.Day:D2}.{date.Month:D2}.{date.Year:D4} {date.Hour:D2}:{date.Minute:D2}:{date.Second:D2}";
+        }
+
+        public static ZonedDateTime UtcToPragueZonedDateTime(this DateTime utcDateTime)
+        {
             var instant = Instant.FromDateTimeUtc(utcDateTime);
             var zone = DateTimeZoneProviders.Tzdb["Europe/Prague"];
-            var date = new ZonedDateTime(instant, zone);
-            return $"{date.Day:D2}.{date.Month:D2}.{date.Year:D4} {date.Hour:D2}:{date.Minute:D2}:{date.Second:D2}";
+            return new ZonedDateTime(instant, zone);
         }
     }
 }
