@@ -30,7 +30,13 @@ namespace LennyBOTv2.Services
 
         public IServiceProvider? ServiceProvider { get; private set; }
 
-        public static LiteDatabase OpenDB() => new LiteDatabase("Files/Lenny.db");
+        public static LiteDatabase OpenDB()
+        {
+            var db = new LiteDatabase("Files/Lenny.db");
+            db.UtcDate = true;
+            db.Mapper.EnumAsInteger = true;
+            return db;
+        }
 
         public IServiceProvider Build(DiscordSocketClient client, IConfiguration config, CommandService commands)
         {

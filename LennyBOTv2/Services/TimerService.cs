@@ -22,6 +22,7 @@ namespace LennyBOTv2.Services
 
         public TimerService(DiscordSocketClient client, IConfiguration config)
         {
+            CacheService.TimerService_LastSentFrogMsg = DateTime.UtcNow.UtcToPragueZonedDateTime().Date.PlusDays(-1); // temporary, remove
             _client = client;
             _config = config;
             _timer = new Timer(TimerCallback, DateTime.UtcNow, TimeSpan.Zero, TimeSpan.FromMinutes(1));
@@ -62,8 +63,6 @@ namespace LennyBOTv2.Services
 
         #region Frog msg
 
-        private static LocalDate _lastSend = DateTime.UtcNow.UtcToPragueZonedDateTime().Date;
-
         private static Stream GetFrogImage(ZonedDateTime zonedDateTime)
         {
             var img = System.Drawing.Image.FromFile("Files/frog.jpg");
@@ -90,7 +89,7 @@ namespace LennyBOTv2.Services
         {
             var zonedDateTime = utcNow.UtcToPragueZonedDateTime();
 
-            if (!TimeSpan.TryParse(_config["frogMsg:time"], out var time) || _lastSend >= zonedDateTime.Minus(Duration.FromTimeSpan(time)).Date)
+            if (!TimeSpan.TryParse(_config["frogMsg:time"], out var time) || CacheService.TimerService_LastSentFrogMsg >= zonedDateTime.Minus(Duration.FromTimeSpan(time)).Date)
                 return;
 
             if (_client.GetUser(Convert.ToUInt64(_config["frogMsg:userId"])) is not SocketUser user)
@@ -100,7 +99,7 @@ namespace LennyBOTv2.Services
 
             await LoggingService.LogInfoAsync($"Sending frog msg to {user.GetNickname()}").ConfigureAwait(false);
             await user.SendFileAsync(GetFrogImage(zonedDateTime), filename, embed: new EmbedBuilder().WithImageUrl($"attachment://{filename}").Build()).ConfigureAwait(false);
-            _lastSend = zonedDateTime.Date;
+            CacheService.TimerService_LastSentFrogMsg = zonedDateTime.Date;
         }
 
         #endregion Frog msg
