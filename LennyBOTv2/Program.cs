@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Reflection;
@@ -10,6 +9,7 @@ using Discord.Commands;
 using Discord.WebSocket;
 using LennyBOTv2.Services;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace LennyBOTv2
 {
@@ -19,7 +19,9 @@ namespace LennyBOTv2
         private readonly DiscordSocketClient _client;
         private readonly CommandService _commands;
         private readonly IConfiguration _config;
+        private readonly string _prefix;
         private IServiceProvider? _services;
+        private MessageHandlingService? _messageHandlingService;
 
         public Program()
         {
@@ -46,6 +48,7 @@ namespace LennyBOTv2
                 LogLevel = IsDebug ? LogSeverity.Debug : LogSeverity.Info,
             });
             _config = BuildConfig();
+            _prefix = _config["prefix"];
         }
 
         public async Task MainAsync()
@@ -58,10 +61,11 @@ namespace LennyBOTv2
             await _client.StartAsync().ConfigureAwait(false);
 
             _services = LennyServiceProvider.Instance.Build(_client, _config, _commands);
+            _messageHandlingService = _services.GetRequiredService<MessageHandlingService>();
 
             await _commands.AddModulesAsync(Assembly.GetEntryAssembly(), _services).ConfigureAwait(false);
             _client.MessageReceived += MessageReceived;
-            _client.MessageDeleted += MessageDeleted;
+            _client.MessageDeleted += _messageHandlingService.MessageDeleted;
 
             await Task.Delay(-1).ConfigureAwait(false);
         }
@@ -80,43 +84,28 @@ namespace LennyBOTv2
             return new ConfigurationBuilder().SetBasePath(cwd).AddJsonFile(file).Build();
         }
 
-        private Task MessageDeleted(Cacheable<IMessage, ulong> msg, ISocketMessageChannel channel)
-        {
-            if (channel.Id == Convert.ToUInt64(_config["msgCounter:channelId"]))
-            {
-                MsgCounterService.DecreaseCount();
-            }
-
-            return Task.CompletedTask;
-        }
-
         private async Task MessageReceived(SocketMessage rawMessage)
         {
-            if (rawMessage.Channel.Id == Convert.ToUInt64(_config["msgCounter:channelId"]))
-            {
-                await MsgCounterService.UpdateMsgCountAsync(rawMessage).ConfigureAwait(false);
-
-                if (MsgCounterService.MsgCount % 10_000 == 0)
-                {
-                    await rawMessage.Channel.SendMessageAsync($"🎉 {((SocketTextChannel)rawMessage.Channel).Mention} has {MsgCounterService.MsgCount:N0} messages 🎉 FeelsBirthdayMan ").ConfigureAwait(false);
-                }
-            }
+            await _messageHandlingService!.MessageReceived(rawMessage).ConfigureAwait(false);
 
             // Ignore system messages and messages from bots
-            if (!(rawMessage is SocketUserMessage message)) return;
+            if (rawMessage is not SocketUserMessage message) return;
             if (message.Source != MessageSource.User) return;
 
             var context = new SocketCommandContext(_client, message);
 
-            if (CheckForRepetition(message))
+            if (_messageHandlingService.CheckForRepetition(message))
             {
                 await context.Channel.SendMessageAsync(message.Content).ConfigureAwait(false);
-                return;
             }
 
-            var prefix = _config["prefix"];
+            if (message.Channel is IDMChannel dmChannel)
+            {
+                await _messageHandlingService.LogDMMessageAsync(message).ConfigureAwait(false);
+            }
+
             var argPos = 0;
-            if (!(message.HasMentionPrefix(_client.CurrentUser, ref argPos) || message.HasStringPrefix(prefix, ref argPos))) return;
+            if (!(message.HasMentionPrefix(_client.CurrentUser, ref argPos) || message.HasStringPrefix(_prefix, ref argPos))) return;
 
             ////ignore msg with prefix only - disabled as per request
             //if (string.IsNullOrEmpty(message.Content?.Replace(prefix, "").Trim())) return;
@@ -148,37 +137,5 @@ namespace LennyBOTv2
                 }
             }
         }
-
-        #region Repetition
-
-        private const int RepetitionCount = 3;
-        private readonly List<SocketUserMessage> _lastMessages = new List<SocketUserMessage>();
-
-        private bool CheckForRepetition(SocketUserMessage msg)
-        {
-            if (_lastMessages.Count == 0)
-            {
-                _lastMessages.Add(msg);
-                return false;
-            }
-            else
-            {
-                var lastMsg = _lastMessages[_lastMessages.Count - 1];
-                if (!(lastMsg.Author.Id != msg.Author.Id && lastMsg.Content.Equals(msg.Content, StringComparison.Ordinal)))
-                    _lastMessages.Clear();
-
-                _lastMessages.Add(msg);
-            }
-
-            if (_lastMessages.Count >= RepetitionCount)
-            {
-                _lastMessages.Clear();
-                return true;
-            }
-
-            return false;
-        }
-
-        #endregion Repetition
     }
 }

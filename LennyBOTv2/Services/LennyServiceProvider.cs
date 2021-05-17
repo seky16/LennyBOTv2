@@ -34,7 +34,7 @@ namespace LennyBOTv2.Services
 
         public IServiceProvider Build(DiscordSocketClient client, IConfiguration config, CommandService commands)
         {
-            if (!(ServiceProvider is null))
+            if (ServiceProvider is not null)
                 return ServiceProvider;
 
             ServiceProvider = new ServiceCollection()
@@ -42,9 +42,11 @@ namespace LennyBOTv2.Services
                 .AddSingleton(config)
                 .AddSingleton(commands)
                 .AddSingleton(new InteractiveService((BaseSocketClient)client))
+                .AddSingleton(new ReliabilityService(client))
                 .AddSingleton(new AsyncOmdbClient(config["omdbAPIkey"], true))
                 .AddSingleton(new YouTubeService(new BaseClientService.Initializer() { ApiKey = config["youtubeAPIkey"], ApplicationName = "LennyBOT" }))
                 .AddSingleton(new TimerService(client, config))
+                .AddSingleton(new MessageHandlingService(client, config))
                 .AddSingleton<AmongUsService>()
                 .AddSingleton<WeatherService>()
                 .AddSingleton<Random>()
@@ -55,8 +57,6 @@ namespace LennyBOTv2.Services
             PaginatedAppearanceOptions.Default.DisplayInformationIcon = false;
             PaginatedAppearanceOptions.Default.JumpDisplayOptions = JumpDisplayOptions.Never;
             PaginatedAppearanceOptions.Default.Stop = null;
-
-            new ReliabilityService(client);
 
             // third-party
             FixerSharp.Fixer.SetApiKey(config["fixerAPIkey"]);

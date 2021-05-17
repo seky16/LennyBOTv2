@@ -9,6 +9,13 @@ namespace LennyBOTv2.Modules
 {
     public class BotOwnerModule : LennyModuleBase
     {
+        private readonly MessageHandlingService _messageHandlingService;
+
+        public BotOwnerModule(MessageHandlingService messageHandlingService)
+        {
+            _messageHandlingService = messageHandlingService;
+        }
+
         [Command("botnick")]
         [IsBotOwner]
         public async Task BotNickCmdAsync([Remainder] string name)
@@ -18,7 +25,7 @@ namespace LennyBOTv2.Modules
         [IsBotOwner]
         public async Task CountMsgsAsync()
         {
-            await ReplyAsync(MsgCounterService.MsgCount.ToString("N0")).ConfigureAwait(false);
+            await ReplyAsync(_messageHandlingService.GetMessageCount().ToString("N0")).ConfigureAwait(false);
         }
 
         [Command("exit", RunMode = RunMode.Async)]
