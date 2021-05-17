@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Reflection;
+using System.Threading;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
@@ -24,6 +26,12 @@ namespace LennyBOTv2
 #if DEBUG
             IsDebug = true;
 #endif
+            CultureInfo.CurrentCulture = CultureInfo.InvariantCulture;
+            CultureInfo.CurrentUICulture = CultureInfo.InvariantCulture;
+            CultureInfo.DefaultThreadCurrentCulture = CultureInfo.InvariantCulture;
+            CultureInfo.DefaultThreadCurrentUICulture = CultureInfo.InvariantCulture;
+            Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
+            Thread.CurrentThread.CurrentUICulture = CultureInfo.InvariantCulture;
 
             _client = new DiscordSocketClient(new DiscordSocketConfig
             {
@@ -65,9 +73,10 @@ namespace LennyBOTv2
         {
             var cwd = Directory.GetCurrentDirectory();
             var file = IsDebug ? "Files/testConfig.json" : "Files/config.json";
-            if (!File.Exists(Path.Combine(cwd, file)))
-                throw new FileNotFoundException("Couldn't find config file.", file);
-            LoggingService.LogInfoAsync($"{file} loaded", "Config");
+            var path = Path.Combine(cwd, file);
+            if (!File.Exists(path))
+                throw new FileNotFoundException("Couldn't find config file.", path);
+            LoggingService.LogInfoAsync($"Loading {path}", "Config");
             return new ConfigurationBuilder().SetBasePath(cwd).AddJsonFile(file).Build();
         }
 

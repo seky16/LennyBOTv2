@@ -61,11 +61,12 @@ namespace LennyBOTv2.Services
 
         #region Frog msg
 
-        private static LocalDate _lastSend = DateTime.UtcNow.UtcToPragueZonedDateTime().Date.PlusDays(-1);
+        private static LocalDate _lastSend = DateTime.UtcNow.UtcToPragueZonedDateTime().Date;
 
         private async Task SendFrogMsg(DateTime utcNow)
         {
             var zonedDateTime = utcNow.UtcToPragueZonedDateTime();
+
             if (!TimeSpan.TryParse(_config["frogMsg:time"], out var time) || _lastSend >= zonedDateTime.Minus(Duration.FromTimeSpan(time)).Date)
                 return;
 
@@ -74,22 +75,23 @@ namespace LennyBOTv2.Services
 
             var filename = zonedDateTime.ToString("yyyyMMddhhmm", null) + ".jpg";
 
+            await LoggingService.LogInfoAsync($"Sending frog msg to {user.GetNickname()}").ConfigureAwait(false);
             await user.SendFileAsync(GetFrogImage(zonedDateTime), filename, embed: new EmbedBuilder().WithImageUrl($"attachment://{filename}").Build()).ConfigureAwait(false);
             _lastSend = zonedDateTime.Date;
         }
 
-        private Stream GetFrogImage(ZonedDateTime zonedDateTime)
+        private static Stream GetFrogImage(ZonedDateTime zonedDateTime)
         {
             var img = System.Drawing.Image.FromFile("Files/frog.jpg");
             var gr = Graphics.FromImage(img);
-            var font = new Font("Times New Roman", 34, FontStyle.Regular);
+            var font = new Font("Times New Roman", 20, FontStyle.Regular);
             var strFormat = new StringFormat() { Alignment = StringAlignment.Center };
             gr.DrawString("Gentlemen, it is with great pleasure to inform you that",
                 font,
                 Brushes.White,
                 new RectangleF(20, 20, img.Width - 40, img.Height - 20),
                 strFormat);
-            gr.DrawString($"today is {zonedDateTime.DayOfWeek}",
+            gr.DrawString($"today is {zonedDateTime.ToString("dddd, MMMM d", null)}",
                 font,
                 Brushes.White,
                 new RectangleF(20, 450, img.Width - 40, img.Height - 450),
