@@ -13,11 +13,12 @@ namespace LennyBOTv2.Services
 {
     public class TimerService
     {
+        private readonly DiscordSocketClient _client;
+
+        private readonly IConfiguration _config;
+
         [SuppressMessage("Code Quality", "IDE0052:Remove unread private members", Justification = "Won't work without it, as Timer gets collected by GC")]
         private readonly Timer _timer;
-
-        private readonly DiscordSocketClient _client;
-        private readonly IConfiguration _config;
 
         public TimerService(DiscordSocketClient client, IConfiguration config)
         {
@@ -63,23 +64,6 @@ namespace LennyBOTv2.Services
 
         private static LocalDate _lastSend = DateTime.UtcNow.UtcToPragueZonedDateTime().Date;
 
-        private async Task SendFrogMsg(DateTime utcNow)
-        {
-            var zonedDateTime = utcNow.UtcToPragueZonedDateTime();
-
-            if (!TimeSpan.TryParse(_config["frogMsg:time"], out var time) || _lastSend >= zonedDateTime.Minus(Duration.FromTimeSpan(time)).Date)
-                return;
-
-            if (_client.GetUser(Convert.ToUInt64(_config["frogMsg:userId"])) is not SocketUser user)
-                return;
-
-            var filename = zonedDateTime.ToString("yyyyMMddhhmm", null) + ".jpg";
-
-            await LoggingService.LogInfoAsync($"Sending frog msg to {user.GetNickname()}").ConfigureAwait(false);
-            await user.SendFileAsync(GetFrogImage(zonedDateTime), filename, embed: new EmbedBuilder().WithImageUrl($"attachment://{filename}").Build()).ConfigureAwait(false);
-            _lastSend = zonedDateTime.Date;
-        }
-
         private static Stream GetFrogImage(ZonedDateTime zonedDateTime)
         {
             var img = System.Drawing.Image.FromFile("Files/frog.jpg");
@@ -100,6 +84,23 @@ namespace LennyBOTv2.Services
             img.Save(stream, img.RawFormat);
             stream.Position = 0;
             return stream;
+        }
+
+        private async Task SendFrogMsg(DateTime utcNow)
+        {
+            var zonedDateTime = utcNow.UtcToPragueZonedDateTime();
+
+            if (!TimeSpan.TryParse(_config["frogMsg:time"], out var time) || _lastSend >= zonedDateTime.Minus(Duration.FromTimeSpan(time)).Date)
+                return;
+
+            if (_client.GetUser(Convert.ToUInt64(_config["frogMsg:userId"])) is not SocketUser user)
+                return;
+
+            var filename = zonedDateTime.ToString("yyyyMMddhhmm", null) + ".jpg";
+
+            await LoggingService.LogInfoAsync($"Sending frog msg to {user.GetNickname()}").ConfigureAwait(false);
+            await user.SendFileAsync(GetFrogImage(zonedDateTime), filename, embed: new EmbedBuilder().WithImageUrl($"attachment://{filename}").Build()).ConfigureAwait(false);
+            _lastSend = zonedDateTime.Date;
         }
 
         #endregion Frog msg
