@@ -64,7 +64,10 @@ namespace LennyBOTv2.Modules
         [Command("say"), Alias("s")]
         [IsBotOwner]
         public async Task SayCmdAsync([Remainder] string text)
-            => await ReplyAsync(text).ConfigureAwait(false);
+        {
+            await ReplyAsync(text).ConfigureAwait(false);
+            await Context.Message.DeleteAsync().ConfigureAwait(false);
+        }
 
         [Command("status")]
         [IsBotOwner]

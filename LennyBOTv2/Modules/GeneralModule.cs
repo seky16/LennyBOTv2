@@ -3,6 +3,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Discord.Commands;
+using Discord.WebSocket;
 
 //using Seky16.Extensions;
 
@@ -20,7 +21,7 @@ namespace LennyBOTv2.Modules
         [Command("clap")]
         public async Task ClapCmdAsync([Remainder] string text)
         {
-            var clapped = $"{Context.Message.Author.Mention}:{Environment.NewLine}";
+            var clapped = GetMentionStr(Context.Message.Author);
             var split = text.ToUpperInvariant().Split(" ", StringSplitOptions.RemoveEmptyEntries);
             clapped += string.Join(" :clap: ", split) + " :clap:";
             await ReplyAsync(clapped).ConfigureAwait(false);
@@ -42,8 +43,7 @@ namespace LennyBOTv2.Modules
         [Command("emojify")]
         public async Task EmojifyCmdAsync([Remainder] string text)
         {
-            var stringBuilder = new StringBuilder(Context.Message.Author.Mention);
-            stringBuilder.AppendLine(":");
+            var stringBuilder = new StringBuilder(GetMentionStr(Context.Message.Author));
             foreach (var ch in text.ToLowerInvariant())
             {
                 switch (ch)
@@ -170,7 +170,7 @@ namespace LennyBOTv2.Modules
                 return Fib(n - 1) + Fib(n - 2);
             }
 
-            var sb = new StringBuilder();
+            var sb = new StringBuilder(GetMentionStr(Context.Message.Author));
             for (var i = 0; i < text.Length; i++)
             {
                 var spaces = Enumerable.Repeat(' ', Fib(i));
@@ -179,17 +179,20 @@ namespace LennyBOTv2.Modules
             }
 
             await ReplyAsync(sb.ToString()).ConfigureAwait(false);
+            await Context.Message.DeleteAsync().ConfigureAwait(false);
         }
 
         [Command("radical")]
         public async Task RadicalCmdAsync([Remainder] string text)
         {
-            var radical = $"{Context.Message.Author.Mention}:{Environment.NewLine}";
+            var radical = GetMentionStr(Context.Message.Author);
             var split = text.ToUpperInvariant().Split(" ", StringSplitOptions.RemoveEmptyEntries);
 
             radical += string.Join(" <:radicalmeme:269806756589207553> ", split) + " <:radicalmeme:269806756589207553>";
             await ReplyAsync(radical).ConfigureAwait(false);
             await Context.Message.DeleteAsync().ConfigureAwait(false);
         }
+
+        private static string GetMentionStr(SocketUser user) => $"{user.Mention}:{Environment.NewLine}";
     }
 }
