@@ -41,21 +41,27 @@ namespace LennyBOTv2.Services
 
         #region Festival ETA
 
-        private static readonly LocalDate _festivalDate = new LocalDate(2021,7,16);
-
-        private static int _lastEta = 0;
+        private static readonly LocalDate _festivalDate = new LocalDate(2021, 7, 16);
 
         private async Task UpdateFestivalEta(DateTime utcNow)
         {
-            if (_client.GetChannel(Convert.ToUInt64(_config["msgCounter:channelId"])) is not SocketTextChannel chan)
-                return;
+            try
+            {
+                if (_client.GetChannel(Convert.ToUInt64(_config["msgCounter:channelId"])) is not SocketTextChannel chan)
+                    return;
 
-            var eta = (_festivalDate - utcNow.UtcToPragueZonedDateTime().Date).Days;
-            if (eta == _lastEta)
-                return;
+                var eta = Period.Between(_festivalDate, utcNow.UtcToPragueZonedDateTime().Date, PeriodUnits.Days).Days;
+                if (eta == CacheService.TimerService_Eta)
+                    return;
 
-            _lastEta = eta;
-            await chan.ModifyAsync(ch => ch.Topic = $"🌌 Liquicity Festival 🎶 T-Minus {eta} days 🚀").ConfigureAwait(false);
+                CacheService.TimerService_Eta = eta;
+                await LoggingService.LogInfoAsync($"Updating festival eta to T{eta} days", nameof(TimerService)).ConfigureAwait(false);
+                await chan.ModifyAsync(ch => ch.Topic = $"🌌 Liquicity Festival 🎶 T{eta} days 🚀").ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                await LoggingService.LogExceptionAsync(ex, nameof(TimerService), $"{nameof(UpdateFestivalEta)} failed").ConfigureAwait(false);
+            }
         }
 
         #endregion Festival ETA
@@ -86,19 +92,26 @@ namespace LennyBOTv2.Services
 
         private async Task SendFrogMsg(DateTime utcNow)
         {
-            var zonedDateTime = utcNow.UtcToPragueZonedDateTime();
+            try
+            {
+                var zonedDateTime = utcNow.UtcToPragueZonedDateTime();
 
-            if (!TimeSpan.TryParse(_config["frogMsg:time"], out var time) || CacheService.TimerService_LastSentFrogMsg >= zonedDateTime.Minus(Duration.FromTimeSpan(time)).Date)
-                return;
+                if (!TimeSpan.TryParse(_config["frogMsg:time"], out var time) || CacheService.TimerService_LastSentFrogMsg >= zonedDateTime.Minus(Duration.FromTimeSpan(time)).Date)
+                    return;
 
-            if (_client.GetUser(Convert.ToUInt64(_config["frogMsg:userId"])) is not SocketUser user)
-                return;
+                if (_client.GetUser(Convert.ToUInt64(_config["frogMsg:userId"])) is not SocketUser user)
+                    return;
 
-            var filename = zonedDateTime.ToString("yyyyMMddhhmm", null) + ".jpg";
+                var filename = zonedDateTime.ToString("yyyyMMddhhmm", null) + ".jpg";
 
-            await LoggingService.LogInfoAsync($"Sending frog msg to {user.GetNickname()}").ConfigureAwait(false);
-            await user.SendFileAsync(GetFrogImage(zonedDateTime), filename, embed: new EmbedBuilder().WithImageUrl($"attachment://{filename}").Build()).ConfigureAwait(false);
-            CacheService.TimerService_LastSentFrogMsg = zonedDateTime.Date;
+                await LoggingService.LogInfoAsync($"Sending frog msg to {user.GetNickname()}", nameof(TimerService)).ConfigureAwait(false);
+                await user.SendFileAsync(GetFrogImage(zonedDateTime), filename, embed: new EmbedBuilder().WithImageUrl($"attachment://{filename}").Build()).ConfigureAwait(false);
+                CacheService.TimerService_LastSentFrogMsg = zonedDateTime.Date;
+            }
+            catch (Exception ex)
+            {
+                await LoggingService.LogExceptionAsync(ex, nameof(TimerService), $"{nameof(SendFrogMsg)} failed").ConfigureAwait(false);
+            }
         }
 
         #endregion Frog msg

@@ -24,6 +24,12 @@ namespace LennyBOTv2.Services
 
         #region TimerService
 
+        public static int TimerService_Eta
+        {
+            get => GetCacheEntry(nameof(TimerService_Eta))?.AsInt32 ?? 0;
+            set => SetCacheEntry(nameof(TimerService_Eta), value);
+        }
+
         public static LocalDate TimerService_LastSentFrogMsg
         {
             get => GetCacheEntry(nameof(TimerService_LastSentFrogMsg))?.AsDateTime.UtcToPragueZonedDateTime().Date ?? LocalDate.FromDateTime(DateTime.UtcNow);
