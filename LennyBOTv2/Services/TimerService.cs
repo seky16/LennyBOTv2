@@ -22,7 +22,6 @@ namespace LennyBOTv2.Services
 
         public TimerService(DiscordSocketClient client, IConfiguration config)
         {
-            CacheService.TimerService_LastSentFrogMsg = DateTime.UtcNow.UtcToPragueZonedDateTime().Date.PlusDays(-1); // temporary, remove
             _client = client;
             _config = config;
             _timer = new Timer(TimerCallback, DateTime.UtcNow, TimeSpan.Zero, TimeSpan.FromMinutes(1));
@@ -42,7 +41,7 @@ namespace LennyBOTv2.Services
 
         #region Festival ETA
 
-        private static readonly DateTime _festivalDate = new DateTime(2021, 7, 16, 0, 0, 0, DateTimeKind.Utc);
+        private static readonly LocalDate _festivalDate = new LocalDate(2021,7,16);
 
         private static int _lastEta = 0;
 
@@ -51,7 +50,7 @@ namespace LennyBOTv2.Services
             if (_client.GetChannel(Convert.ToUInt64(_config["msgCounter:channelId"])) is not SocketTextChannel chan)
                 return;
 
-            var eta = (_festivalDate - utcNow.AddHours(1).Date).Days;
+            var eta = (_festivalDate - utcNow.UtcToPragueZonedDateTime().Date).Days;
             if (eta == _lastEta)
                 return;
 
