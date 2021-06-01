@@ -34,6 +34,13 @@ namespace LennyBOTv2.Services
             Console.WriteLine(msg.ToString());
             Console.ForegroundColor = cc;
 
+            if (msg.Exception is Discord.Net.WebSocketClosedException ||
+                msg.Exception is Discord.WebSocket.GatewayReconnectException ||
+                msg.Exception.AnyInnerException<System.Net.WebSockets.WebSocketException>())
+            {
+                Environment.Exit(-1); // reconnect on WebSocket closed
+            }
+
             return Task.CompletedTask;
         }
 

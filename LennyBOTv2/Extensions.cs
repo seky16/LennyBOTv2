@@ -55,6 +55,8 @@ namespace LennyBOTv2
 #endif
         }
 
+        public static async Task MarkCmdOkAsync(this SocketCommandContext context) => await context.Message.AddReactionAsync(new Emoji("✅")).ConfigureAwait(false);
+
         public static IMessage ModifyAfter(this IUserMessage msg, int seconds, string newContent)
         {
             Task.Run(async () =>
@@ -84,6 +86,19 @@ namespace LennyBOTv2
             var instant = Instant.FromDateTimeUtc(utcDateTime);
             var zone = DateTimeZoneProviders.Tzdb["Europe/Prague"];
             return new ZonedDateTime(instant, zone);
+        }
+
+        public static bool AnyInnerException<T>(this Exception? ex) where T : Exception
+        {
+            while (ex is not null)
+            {
+                if (ex is T)
+                    return true;
+
+                ex = ex.InnerException;
+            }
+
+            return false;
         }
     }
 }

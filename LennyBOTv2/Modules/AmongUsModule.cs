@@ -30,7 +30,7 @@ namespace LennyBOTv2.Modules
                 return;
             }
 
-            await Context.Message.AddReactionAsync(new Emoji("✅")).ConfigureAwait(false);
+            await Context.MarkCmdOkAsync().ConfigureAwait(false);
         }
 
         [Command("impostor")]
@@ -47,7 +47,7 @@ namespace LennyBOTv2.Modules
                 return;
             }
 
-            await Context.Message.AddReactionAsync(new Emoji("✅")).ConfigureAwait(false);
+            await Context.MarkCmdOkAsync().ConfigureAwait(false);
         }
 
         [Command("stats")]
