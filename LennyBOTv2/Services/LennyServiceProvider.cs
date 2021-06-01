@@ -56,6 +56,7 @@ namespace LennyBOTv2.Services
                 .AddSingleton<AmongUsService>()
                 .AddSingleton<WeatherService>()
                 .AddSingleton<Random>()
+                .AddSingleton<ReminderService>()
 
                 .BuildServiceProvider();
 
