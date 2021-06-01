@@ -5,7 +5,7 @@ using LennyBOTv2.Services;
 
 namespace LennyBOTv2.Modules
 {
-    public class ReminderModule :LennyModuleBase
+    public class ReminderModule : LennyModuleBase
     {
         private readonly ReminderService _rs;
 
@@ -14,6 +14,7 @@ namespace LennyBOTv2.Modules
             _rs = rs;
         }
 
+        [RequireOwner]
         [Command("remindme")]
         public async Task RemindMeCmdAsync([Remainder] string input)
         {
