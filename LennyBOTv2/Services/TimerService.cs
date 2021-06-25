@@ -35,15 +35,15 @@ namespace LennyBOTv2.Services
             if (state is not DateTime utcNow)
                 return;
 
-            await UpdateFestivalEta(utcNow).ConfigureAwait(false);
+            await UpdateChannelTopic(utcNow).ConfigureAwait(false);
             await SendFrogMsg(utcNow).ConfigureAwait(false);
         }
 
-        #region Festival ETA
+        #region Channel topic
 
-        private static readonly LocalDate _festivalDate = new LocalDate(2021, 7, 16);
+        private static readonly LocalDate _festivalDate = new LocalDate(2021, 8, 25);
 
-        private async Task UpdateFestivalEta(DateTime utcNow)
+        private async Task UpdateChannelTopic(DateTime utcNow)
         {
             try
             {
@@ -51,20 +51,20 @@ namespace LennyBOTv2.Services
                     return;
 
                 var eta = Period.Between(_festivalDate, utcNow.UtcToPragueZonedDateTime().Date, PeriodUnits.Days).Days;
-                if (eta == CacheService.TimerService_Eta)
+                if (eta == CacheService.TimerService_ChannelTopicEta)
                     return;
 
-                CacheService.TimerService_Eta = eta;
-                await LoggingService.LogInfoAsync($"Updating festival eta to T{eta} days", nameof(TimerService)).ConfigureAwait(false);
-                await chan.ModifyAsync(ch => ch.Topic = $"🌌 Liquicity Festival 🎶 T{eta} days 🚀").ConfigureAwait(false);
+                CacheService.TimerService_ChannelTopicEta = eta;
+                await LoggingService.LogInfoAsync($"Updating channel topic ETA to T{eta} days", nameof(TimerService)).ConfigureAwait(false);
+                await chan.ModifyAsync(ch => ch.Topic = $"Sean visit {Emote.Parse("<:shawn:271652274764251136>")} T{eta} days {Emote.Parse("<:Pog:451370032191242242>")}").ConfigureAwait(false);
             }
             catch (Exception ex)
             {
-                await LoggingService.LogExceptionAsync(ex, nameof(TimerService), $"{nameof(UpdateFestivalEta)} failed").ConfigureAwait(false);
+                await LoggingService.LogExceptionAsync(ex, nameof(TimerService), $"{nameof(UpdateChannelTopic)} failed").ConfigureAwait(false);
             }
         }
 
-        #endregion Festival ETA
+        #endregion Channel topic
 
         #region Frog msg
 

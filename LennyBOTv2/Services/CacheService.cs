@@ -24,10 +24,10 @@ namespace LennyBOTv2.Services
 
         #region TimerService
 
-        public static int TimerService_Eta
+        public static int TimerService_ChannelTopicEta
         {
-            get => GetCacheEntry(nameof(TimerService_Eta))?.AsInt32 ?? 0;
-            set => SetCacheEntry(nameof(TimerService_Eta), value);
+            get => GetCacheEntry(nameof(TimerService_ChannelTopicEta))?.AsInt32 ?? 0;
+            set => SetCacheEntry(nameof(TimerService_ChannelTopicEta), value);
         }
 
         public static LocalDate TimerService_LastSentFrogMsg
