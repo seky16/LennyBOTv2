@@ -6,8 +6,13 @@ namespace LennyBOTv2.Services
 {
     internal static class LoggingService
     {
+        public static LogSeverity LogLevel { get; set; }
+
         public static Task LogAsync(LogMessage msg)
         {
+            if (msg.Severity > LogLevel)
+                return Task.CompletedTask;
+
             var cc = Console.ForegroundColor;
             switch (msg.Severity)
             {

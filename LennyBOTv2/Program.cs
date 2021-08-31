@@ -25,9 +25,12 @@ namespace LennyBOTv2
 
         public Program()
         {
+            LoggingService.LogLevel = LogSeverity.Info;
 #if DEBUG
             IsDebug = true;
+            LoggingService.LogLevel = LogSeverity.Debug;
 #endif
+
             CultureInfo.CurrentCulture = CultureInfo.InvariantCulture;
             CultureInfo.CurrentUICulture = CultureInfo.InvariantCulture;
             CultureInfo.DefaultThreadCurrentCulture = CultureInfo.InvariantCulture;
@@ -37,7 +40,7 @@ namespace LennyBOTv2
 
             _client = new DiscordSocketClient(new DiscordSocketConfig
             {
-                LogLevel = IsDebug ? LogSeverity.Debug : LogSeverity.Info,
+                LogLevel = LoggingService.LogLevel,
                 MessageCacheSize = 1000,
                 AlwaysDownloadUsers = true,
             });
@@ -45,7 +48,7 @@ namespace LennyBOTv2
             {
                 DefaultRunMode = RunMode.Async,
                 CaseSensitiveCommands = false,
-                LogLevel = IsDebug ? LogSeverity.Debug : LogSeverity.Info,
+                LogLevel = LoggingService.LogLevel,
             });
             _config = BuildConfig();
             _prefix = _config["prefix"];
@@ -53,6 +56,7 @@ namespace LennyBOTv2
 
         public async Task MainAsync()
         {
+            await LoggingService.LogAsync(new LogMessage(LoggingService.LogLevel, nameof(LoggingService), $"{nameof(LoggingService.LogLevel)} set to {LoggingService.LogLevel}")).ConfigureAwait(false);
             _client.Log += LoggingService.LogAsync;
             _commands.Log += LoggingService.LogAsync;
             _client.Disconnected += (ex) => LoggingService.LogExceptionAsync(ex, "Client");
