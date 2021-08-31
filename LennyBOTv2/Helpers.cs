@@ -2,8 +2,10 @@
 using System.IO;
 using System.Linq;
 using System.Net.Http;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Xml.Serialization;
+using Discord;
 using LennyBOTv2.Services;
 using Newtonsoft.Json;
 
@@ -99,6 +101,15 @@ namespace LennyBOTv2
             }
 
             return await result.Content.ReadAsStringAsync().ConfigureAwait(false);
+        }
+
+        private static readonly Regex _emoteRegex = new Regex(@"<a?:\w+:\d+>", RegexOptions.IgnoreCase | RegexOptions.Compiled);
+
+        public static string ReplaceEmotesInText(string text)
+        {
+            return _emoteRegex.Replace(
+                text,
+                match => Emote.TryParse(match.Value, out var emote) ? emote.ToString() : match.Value);
         }
     }
 }

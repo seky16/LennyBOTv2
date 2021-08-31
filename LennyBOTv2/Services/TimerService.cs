@@ -29,6 +29,7 @@ namespace LennyBOTv2.Services
 
         private async void TimerCallback(object? state)
         {
+            await LoggingService.LogDebugAsync($"{nameof(TimerCallback)} started", nameof(TimerService)).ConfigureAwait(false);
             if (_client.ConnectionState != ConnectionState.Connected)
                 return;
 
@@ -41,22 +42,34 @@ namespace LennyBOTv2.Services
 
         #region Channel topic
 
-        private static readonly LocalDate _festivalDate = new LocalDate(2021, 8, 25);
-
         private async Task UpdateChannelTopic(DateTime utcNow)
         {
             try
             {
-                if (_client.GetChannel(Convert.ToUInt64(_config["msgCounter:channelId"])) is not SocketTextChannel chan)
+                await LoggingService.LogDebugAsync($"{nameof(UpdateChannelTopic)} started", nameof(TimerService)).ConfigureAwait(false);
+                if (_client.GetChannel(Convert.ToUInt64(_config["channelTopic:channelId"])) is not SocketTextChannel chan)
                     return;
 
-                var eta = Period.Between(_festivalDate, utcNow.UtcToPragueZonedDateTime().Date, PeriodUnits.Days).Days;
+                if (!DateTime.TryParse(_config["channelTopic:date"], out var date))
+                    return;
+
+                var localDate = LocalDate.FromDateTime(date);
+
+                var eta = Period.Between(localDate, utcNow.UtcToPragueZonedDateTime().Date, PeriodUnits.Days).Days;
                 if (eta == CacheService.TimerService_ChannelTopicEta)
                     return;
 
                 CacheService.TimerService_ChannelTopicEta = eta;
-                await LoggingService.LogInfoAsync($"Updating channel topic ETA to T{eta} days", nameof(TimerService)).ConfigureAwait(false);
-                await chan.ModifyAsync(ch => ch.Topic = $"Sean visit {Emote.Parse("<:shawn:271652274764251136>")} T{eta} days {Emote.Parse("<:Pog:451370032191242242>")}").ConfigureAwait(false);
+
+                var text = _config["channelTopic:text"];
+
+                if (string.IsNullOrEmpty(text))
+                    return;
+
+                text = Helpers.ReplaceEmotesInText(text).Replace("{eta}", (eta > 0 ? "+" : "") + eta);
+
+                await LoggingService.LogInfoAsync($"Updating {chan} topic to '{text}'", nameof(TimerService)).ConfigureAwait(false);
+                await chan.ModifyAsync(ch => ch.Topic = text).ConfigureAwait(false);
             }
             catch (Exception ex)
             {
@@ -94,6 +107,7 @@ namespace LennyBOTv2.Services
         {
             try
             {
+                await LoggingService.LogDebugAsync($"{nameof(SendFrogMsg)} started", nameof(TimerService)).ConfigureAwait(false);
                 var zonedDateTime = utcNow.UtcToPragueZonedDateTime();
 
                 if (!TimeSpan.TryParse(_config["frogMsg:time"], out var time) || CacheService.TimerService_LastSentFrogMsg >= zonedDateTime.Minus(Duration.FromTimeSpan(time)).Date)
