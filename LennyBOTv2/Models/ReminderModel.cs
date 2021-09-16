@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace LennyBOTv2.Models
+namespace LennyBOTv2.Models.Reminders
 {
     public record ReminderModel(
         DateTime CreatedUtc,

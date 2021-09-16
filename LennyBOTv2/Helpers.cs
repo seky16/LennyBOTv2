@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
@@ -6,8 +7,8 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Xml.Serialization;
 using Discord;
+using LennyBOTv2.Models;
 using LennyBOTv2.Services;
-using Newtonsoft.Json;
 
 namespace LennyBOTv2
 {
@@ -38,7 +39,7 @@ namespace LennyBOTv2
             throw new UriFormatException($"'{url}' is not a valid URL");
         }
 
-        public static async Task<T?> GetFromJsonAsync<T>(FormattableString url) where T : class
+        public static async Task<T?> GetFromJsonAsync<T>(FormattableString url) where T : BaseJsonModel<T>
         {
             var jsonStr = await GetStringAsync(url).ConfigureAwait(false);
 
@@ -48,18 +49,36 @@ namespace LennyBOTv2
                 return null;
             }
 
-            T? model;
             try
             {
-                model = JsonConvert.DeserializeObject<T>(jsonStr);
+                return BaseJsonModel<T>.FromJson(jsonStr);
             }
             catch (Exception ex)
             {
                 await LoggingService.LogExceptionAsync(ex, typeof(T).Name, jsonStr).ConfigureAwait(false);
                 return null;
             }
+        }
 
-            return model;
+        public static async Task<IEnumerable<T?>?> GetFromJsonArrayAsync<T>(FormattableString url) where T : BaseJsonModel<T>
+        {
+            var jsonStr = await GetStringAsync(url).ConfigureAwait(false);
+
+            if (string.IsNullOrEmpty(jsonStr))
+            {
+                await LoggingService.LogErrorAsync($"'{url}' returned empty string", nameof(GetFromJsonAsync)).ConfigureAwait(false);
+                return null;
+            }
+
+            try
+            {
+                return BaseJsonModel<T>.FromJsonArray(jsonStr);
+            }
+            catch (Exception ex)
+            {
+                await LoggingService.LogExceptionAsync(ex, typeof(T).Name, jsonStr).ConfigureAwait(false);
+                return null;
+            }
         }
 
         public static async Task<T?> GetFromXmlAsync<T>(FormattableString url) where T : class
@@ -68,7 +87,7 @@ namespace LennyBOTv2
 
             if (string.IsNullOrEmpty(xmlStr))
             {
-                await LoggingService.LogErrorAsync($"'{url}' returned empty string", nameof(GetFromJsonAsync)).ConfigureAwait(false);
+                await LoggingService.LogErrorAsync($"'{url}' returned empty string", nameof(GetFromXmlAsync)).ConfigureAwait(false);
                 return null;
             }
 
@@ -96,7 +115,7 @@ namespace LennyBOTv2
             var result = await client.GetAsync(safeUrl).ConfigureAwait(false);
             if (!result.IsSuccessStatusCode)
             {
-                await LoggingService.LogErrorAsync($"'{safeUrl}' returned {result.StatusCode}", nameof(GetFromJsonAsync)).ConfigureAwait(false);
+                await LoggingService.LogErrorAsync($"'{safeUrl}' returned {result.StatusCode}", nameof(GetStringAsync)).ConfigureAwait(false);
                 return null;
             }
 

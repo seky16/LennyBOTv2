@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Discord;
-using LennyBOTv2.Models;
+using LennyBOTv2.Models.Reminders;
 using Microsoft.Recognizers.Text;
 using Microsoft.Recognizers.Text.DateTime;
 

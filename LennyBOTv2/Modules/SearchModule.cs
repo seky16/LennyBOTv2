@@ -9,7 +9,7 @@ using Discord.Addons.Interactive;
 using Discord.Commands;
 using Google.Apis.YouTube.v3;
 using HtmlAgilityPack;
-using LennyBOTv2.Models;
+using LennyBOTv2.Models.UrbanDictionary;
 using LennyBOTv2.Services;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -127,13 +127,13 @@ Awards: {item.Awards}";
             }
 
             var pages = new List<string>();
-            foreach (var item in urbanModel.List.OrderByDescending(x => x.ThumbsUp))
+            foreach (var item in urbanModel.List.Where(x => !string.IsNullOrEmpty(x?.Definition) && !string.IsNullOrEmpty(x.Example)).OrderByDescending(x => x.ThumbsUp))
             {
                 pages.Add(new StringBuilder()
-                    .AppendLine(item.Definition.Replace("[", "").Replace("]", ""))
+                    .AppendLine(item!.Definition!.Replace("[", "").Replace("]", ""))
                     .AppendLine()
                     .AppendLine("*Example:*")
-                    .AppendLine(item.Example.Replace("[", "").Replace("]", ""))
+                    .AppendLine(item.Example!.Replace("[", "").Replace("]", ""))
                     .ToString());
             }
             var author = new EmbedAuthorBuilder()

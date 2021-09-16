@@ -3,6 +3,34 @@ using Newtonsoft.Json;
 
 namespace LennyBOTv2.Models.Weatherstack
 {
+    /// <summary>
+    /// https://weatherstack.com/documentation#current_weather
+    /// </summary>
+    public class WeatherStackModel : BaseJsonModel<WeatherStackModel>
+    {
+        [JsonProperty("current")]
+        public Current? Current { get; set; }
+
+        /// <summary>
+        /// Whenever an API request fails, the weatherstack API will return an error object in lightweight JSON format.
+        /// Each error object contains an error code, an error type and an info object containing details about the error that occurred.
+        /// </summary>
+        [JsonProperty("error")]
+        public Error? Error { get; set; }
+
+        [JsonProperty("location")]
+        public Location? Location { get; set; }
+
+        [JsonProperty("request")]
+        public Request? Request { get; set; }
+
+        /// <summary>
+        /// https://weatherstack.com/documentation#api_error_codes
+        /// </summary>
+        [JsonProperty("success")]
+        public bool Success { get; set; } = true;
+    }
+
     public class Current
     {
         /// <summary>
@@ -199,33 +227,5 @@ namespace LennyBOTv2.Models.Weatherstack
         /// </summary>
         [JsonProperty("unit")]
         public string? Unit { get; set; }
-    }
-
-    /// <summary>
-    /// https://weatherstack.com/documentation#current_weather
-    /// </summary>
-    public class WeatherStackModel
-    {
-        [JsonProperty("current")]
-        public Current? Current { get; set; }
-
-        /// <summary>
-        /// Whenever an API request fails, the weatherstack API will return an error object in lightweight JSON format.
-        /// Each error object contains an error code, an error type and an info object containing details about the error that occurred.
-        /// </summary>
-        [JsonProperty("error")]
-        public Error? Error { get; set; }
-
-        [JsonProperty("location")]
-        public Location? Location { get; set; }
-
-        [JsonProperty("request")]
-        public Request? Request { get; set; }
-
-        /// <summary>
-        /// https://weatherstack.com/documentation#api_error_codes
-        /// </summary>
-        [JsonProperty("success")]
-        public bool Success { get; set; } = true;
     }
 }

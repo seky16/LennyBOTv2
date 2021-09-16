@@ -1,6 +1,6 @@
 ﻿using LiteDB;
 
-namespace LennyBOTv2.Models
+namespace LennyBOTv2.Models.AmongUs
 {
     public class PlayerModel
     {
