@@ -9,6 +9,7 @@ using Discord.Addons.Interactive;
 using Discord.Commands;
 using Google.Apis.YouTube.v3;
 using HtmlAgilityPack;
+using LennyBOTv2.Models.Definition;
 using LennyBOTv2.Models.UrbanDictionary;
 using LennyBOTv2.Services;
 using Newtonsoft.Json;
@@ -225,6 +226,62 @@ Awards: {item.Awards}";
             }
             var video = $"https://www.youtube.com/watch?v={ response.Items[0].Id.VideoId}";
             await ReplyAsync(video).ConfigureAwait(false);
+        }
+
+        [Command("definition", RunMode = RunMode.Async), Alias("def")]
+        public async Task DefinitionCmdAsync([Remainder] string query)
+        {
+            var model = await Helpers.GetFromJsonArrayAsync<DefinitionModel>($"https://api.dictionaryapi.dev/api/v2/entries/en/{query}").ConfigureAwait(false);
+            if (model?.All(d => d is null) != false)
+            {
+                await Context.MarkCmdFailedAsync($"No definition for '{query}'").ConfigureAwait(false);
+                return;
+            }
+
+            var pages = new List<string>();
+            foreach (var item in model.Where(d => !(d is null)))
+            {
+                var sb = new StringBuilder(item!.Word);
+                if (item.Phonetics?.Count > 0)
+                {
+                    item.Phonetics?.ForEach(p =>
+                    {
+                        if (!string.IsNullOrEmpty(p?.Text))
+                            sb.AppendFormat(@" [\[{0}\]]({1})", p.Text, p.Audio);
+                    });
+                }
+                sb.AppendLine();
+                if (!string.IsNullOrEmpty(item.Origin))
+                    sb.AppendLine(item.Origin);
+                item.Meanings?.ForEach(m =>
+                {
+                    sb.AppendLine();
+                    if (!string.IsNullOrEmpty(m.PartOfSpeech))
+                        sb.Append("**").Append(m.PartOfSpeech).AppendLine("**");
+                    if (m?.Definitions?.Count > 0)
+                    {
+                        m.Definitions?.ForEach(d =>
+                        {
+                            if (!string.IsNullOrEmpty(d.Definition))
+                                sb.Append("- ").AppendLine(d.Definition);
+                            if (!string.IsNullOrEmpty(d.Example))
+                                sb.Append("\t*").Append(d.Example).AppendLine("*");
+                            if (d?.Synonyms?.Count > 0)
+                                sb.Append("Synonyms: ").AppendJoin(", ", d.Synonyms!).AppendLine();
+                            if (d?.Antonyms?.Count > 0)
+                                sb.Append("Antonyms: ").AppendJoin(", ", d.Antonyms!).AppendLine();
+                        });
+                    }
+                });
+                pages.Add(sb.ToString());
+            }
+            var author = new EmbedAuthorBuilder()
+                .WithName("freeDictionaryApi")
+                .WithIconUrl("https://dictionaryapi.dev/favicon.ico")
+                .WithUrl("https://github.com/meetDeveloper/freeDictionaryAPI");
+            var msg = new PaginatedMessage() { Title = $"Definitions for *{query}*", Author = author, Color = new Color(217, 66, 53), Pages = pages };
+
+            await PagedReplyAsync(msg, false).ConfigureAwait(false);
         }
     }
 }
