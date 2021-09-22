@@ -100,5 +100,20 @@ namespace LennyBOTv2
 
             return false;
         }
+        public static string Truncate(this string str, int size, string appendix = "...")
+        {
+            if (str is null)
+                throw new ArgumentNullException(nameof(str));
+
+            if (appendix is null)
+                appendix = string.Empty;
+
+            if (str.Length <= size)
+                return str;
+            else
+                return str.Substring(0, size - appendix.Length) + appendix;
+        }
+
+
     }
 }
