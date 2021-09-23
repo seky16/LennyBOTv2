@@ -49,7 +49,7 @@ namespace LennyBOTv2.Modules
                     .WithName(Context.User.GetNickname())
                     .WithIconUrl(Context.User.GetAvatarUrl() ?? Context.User.GetDefaultAvatarUrl()))
                 .WithCurrentTimestamp()
-                .WithDescription($"{amountD.ToString(CultureInfo.InvariantCulture)} {from.ToUpper()} = **{result.ToString(CultureInfo.InvariantCulture)} {to.ToUpper()}**");
+                .WithDescription($"{amountD.ToString(CultureInfo.InvariantCulture)} {from.ToUpper()} = {result.ToString(CultureInfo.InvariantCulture).Bold()} {to.ToUpper().Bold()}");
             await ReplyEmbedAsync(embed).ConfigureAwait(false);
         }
     }

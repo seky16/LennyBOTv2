@@ -138,7 +138,7 @@ namespace LennyBOTv2.Modules
                         break;
 
                     default:
-                        stringBuilder.Append("**").Append(ch.ToString().ToUpper()).Append("** ");
+                        stringBuilder.Append(ch.ToString().ToUpper().Bold()).Append(' ');
                         break;
                 }
             }

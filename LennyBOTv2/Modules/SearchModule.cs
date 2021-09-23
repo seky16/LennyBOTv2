@@ -38,7 +38,7 @@ namespace LennyBOTv2.Modules
             var doc = new HtmlWeb().Load("https://finance.yahoo.com/quote/AMD");
             var header = doc.GetElementbyId("quote-header-info");
             var info = header.LastChild.FirstChild.FirstChild.ChildNodes.Select(n => n.InnerText).ToList();
-            await ReplyAsync($"**{info[0]}$**\n{info[1]}\n{info[2]}").ConfigureAwait(false);
+            await ReplyAsync($"{(info[0] + "$").Bold()}\n{info[1]}\n{info[2]}").ConfigureAwait(false);
         }
 
         [Command("imdb", RunMode = RunMode.Async)]
@@ -77,33 +77,33 @@ namespace LennyBOTv2.Modules
             foreach (var result in list.SearchResults)
             {
                 var item = await _omdb.GetItemByIdAsync(result.ImdbId).ConfigureAwait(false);
-                var str = $@"[**{item.Title} ({item.Year})**](https://www.imdb.com/title/{ item.ImdbId})
+                var str = $@"{$"{item.Title} ({item.Year})".Bold().Hyperlink(Helpers.BuildSafeUrl($"https://www.imdb.com/title/{item.ImdbId}"))}
 {item.Plot} ({item.Runtime})
-**Rating**
+{"Rating".Bold()}
 {item.ImdbRating}
 Metascore: {item.Metascore}
-**Info**
+{"Info".Bold()}
 Director: {item.Director}
 Writer: {item.Writer}
 Cast: {item.Actors}
 Genre: {item.Genre}
 Country: {item.Country}
-**Release dates**
+{"Release dates".Bold()}
 Released: {item.Released}
 DVD: {item.Dvd}
-**Trivia**
+{"Trivia".Bold()}
 Box office: {item.BoxOffice}
 Awards: {item.Awards}";
                 pages.Add(str);
             }
-            var msg = new PaginatedMessage() { Title = $"Search results for *{query}*", Author = author, Color = new Color(248, 231, 28), Pages = pages };
+            var msg = new PaginatedMessage() { Title = $"Search results for {query.Italics()}", Author = author, Color = new Color(248, 231, 28), Pages = pages };
 
             await PagedReplyAsync(msg, false).ConfigureAwait(false);
         }
 
         [Command("lmgtfy")]
         public Task LmgtfyCmdAsync([Remainder] string search = "How to use Lmgtfy")
-            => ReplyAsync($"**Your special URL: **<http://lmgtfy.com/?q={ Uri.EscapeUriString(search)}>");
+            => ReplyAsync("Your special URL: ".Bold() + Helpers.BuildSafeUrl($"http://lmgtfy.com/?q={Uri.EscapeUriString(search)}").HideLinkPreview());
 
         [Command("urban", RunMode = RunMode.Async)]
         public async Task UrbanCmdAsync([Remainder] string query)
@@ -123,7 +123,7 @@ Awards: {item.Awards}";
             var urbanModel = UrbanModel.FromJson(jsonString);
             if (urbanModel?.List is null || urbanModel.List.Count == 0)
             {
-                await ReplyAsync($"There are no definitions for word: **{query}**.").ConfigureAwait(false);
+                await ReplyAsync($"There are no definitions for word: {query.Bold()}.").ConfigureAwait(false);
                 return;
             }
 
@@ -133,7 +133,7 @@ Awards: {item.Awards}";
                 pages.Add(new StringBuilder()
                     .AppendLine(item!.Definition!.Replace("[", "").Replace("]", ""))
                     .AppendLine()
-                    .AppendLine("*Example:*")
+                    .AppendLine("Example:".Italics())
                     .AppendLine(item.Example!.Replace("[", "").Replace("]", ""))
                     .ToString());
             }
@@ -141,7 +141,7 @@ Awards: {item.Awards}";
                 .WithName("Urban Dictionary")
                 .WithIconUrl("https://d2gatte9o95jao.cloudfront.net/assets/apple-touch-icon-55f1ee4ebfd5444ef5f8d5ba836a2d41.png")
                 .WithUrl("https://urbandictionary.com");
-            var msg = new PaginatedMessage() { Title = $"Definitions for *{query}*", Author = author, Color = new Color(255, 84, 33), Pages = pages };
+            var msg = new PaginatedMessage() { Title = $"Definitions for {query.Italics()}", Author = author, Color = new Color(255, 84, 33), Pages = pages };
 
             await PagedReplyAsync(msg, false).ConfigureAwait(false);
         }
@@ -194,7 +194,7 @@ Awards: {item.Awards}";
             for (var i = 0; i < titles?.Count; i++)
             {
                 pages.Add(new StringBuilder()
-                .Append("[**").Append(titles[i]).Append("**](").Append(urls?[i]).AppendLine(")")
+                .Append('[').Append(titles[i].Bold()).Append("](").Append(urls?[i]).AppendLine(")")
                 .AppendLine(descriptions?[i])
                 .ToString());
             }
@@ -203,7 +203,7 @@ Awards: {item.Awards}";
                 .WithName("Wikipedia")
                 .WithIconUrl("https://upload.wikimedia.org/wikipedia/commons/d/de/Wikipedia_Logo_1.0.png")
                 .WithUrl("https://en.wikipedia.org/wiki/Main_Page");
-            var msg = new PaginatedMessage() { Title = $"Search results for *{query}*", Author = author, Color = new Color(255, 255, 255), Pages = pages };
+            var msg = new PaginatedMessage() { Title = $"Search results for {query.Italics()}", Author = author, Color = new Color(255, 255, 255), Pages = pages };
 
             await PagedReplyAsync(msg, false).ConfigureAwait(false);
         }
@@ -257,7 +257,7 @@ Awards: {item.Awards}";
                 {
                     sb.AppendLine();
                     if (!string.IsNullOrEmpty(m.PartOfSpeech))
-                        sb.Append("**").Append(m.PartOfSpeech).AppendLine("**");
+                        sb.AppendLine(m.PartOfSpeech.Bold());
                     if (m?.Definitions?.Count > 0)
                     {
                         m.Definitions?.ForEach(d =>
@@ -265,7 +265,7 @@ Awards: {item.Awards}";
                             if (!string.IsNullOrEmpty(d.Definition))
                                 sb.Append("- ").AppendLine(d.Definition);
                             if (!string.IsNullOrEmpty(d.Example))
-                                sb.Append("\t*").Append(d.Example).AppendLine("*");
+                                sb.Append('\t').AppendLine(d.Example.Italics());
                             if (d?.Synonyms?.Count > 0)
                                 sb.Append("Synonyms: ").AppendJoin(", ", d.Synonyms!).AppendLine();
                             if (d?.Antonyms?.Count > 0)
@@ -279,7 +279,7 @@ Awards: {item.Awards}";
                 .WithName("freeDictionaryApi")
                 .WithIconUrl("https://media.discordapp.net/attachments/360705292385910784/890171034689482782/favicon.png")
                 .WithUrl("https://github.com/meetDeveloper/freeDictionaryAPI");
-            var msg = new PaginatedMessage() { Title = $"Definitions for *{query}*", Author = author, Color = new Color(217, 66, 53), Pages = pages };
+            var msg = new PaginatedMessage() { Title = $"Definitions for {query.Italics()}", Author = author, Color = new Color(217, 66, 53), Pages = pages };
 
             await PagedReplyAsync(msg, false).ConfigureAwait(false);
         }

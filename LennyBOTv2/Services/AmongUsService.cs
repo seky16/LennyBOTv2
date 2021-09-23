@@ -29,7 +29,7 @@ namespace LennyBOTv2.Services
                     0 => ":first_place:",
                     1 => ":second_place:",
                     2 => ":third_place:",
-                    _ => $"**{i + 1}**",
+                    _ => $"{(i + 1).ToString().Bold()}",
                 };
 
                 sb.AppendFormat("{0} {1} {2}/{3} ({4:P2})", place, impostor.Nickname, impostor.Wins, impostor.Wins + impostor.Losses, impostor.Winrate).AppendLine();
