@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Text;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
@@ -78,5 +79,34 @@ namespace LennyBOTv2.Modules
         [IsBotOwner]
         public async Task WatchingCmdAsync([Remainder] string name)
             => await Context.Client.SetGameAsync(name, null, ActivityType.Watching).ConfigureAwait(false);
+
+        [Command("testmd")]
+        [IsBotOwner]
+        public async Task TestMDCmdAsync()
+        {
+            var text = new StringBuilder()
+                .AppendLine("italics".Italics())
+                .AppendLine("bold".Bold())
+                .AppendLine("underline".Underline())
+                .AppendLine("underline italics".UnderlineItalics())
+                .AppendLine("underline bold".UnderlineBold())
+                .AppendLine("bold italics".BoldItalics())
+                .AppendLine("underline bold italics".UnderlineBoldItalics())
+                .AppendLine("strikethrough".Strikethrough())
+                .AppendLine("hulk dabs".Spoiler())
+                .AppendLine("code".Code())
+                .AppendLine("Console.WriteLine(\"Hello world!\");".CodeMultiline("cs"))
+                .AppendLine("first qoute\nsecond quote".BlockQuote())
+                .AppendLine("https://youtube.com/asd>asd".HideLinkPreview())
+                .AppendLine(new Uri("https://youtube.com/asd>asd").HideLinkPreview())
+                .AppendLine("youtube".Hyperlink("https://youtube.com/asd>asd"))
+                .AppendLine("uri".Hyperlink(new Uri("https://youtube.com/asd>asd")))
+                .AppendLine("text only".Hyperlink(""))
+                .AppendLine("text only2".Hyperlink((Uri?)null))
+                .AppendLine("".Hyperlink("https://youtube.com/asd>asd"))
+                .ToString();
+
+            await ReplyAsync(text);
+        }
     }
 }
