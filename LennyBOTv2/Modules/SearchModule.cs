@@ -103,7 +103,7 @@ Awards: {item.Awards}";
 
         [Command("lmgtfy")]
         public Task LmgtfyCmdAsync([Remainder] string search = "How to use Lmgtfy")
-            => ReplyAsync("Your special URL: ".Bold() + Helpers.BuildSafeUrl($"http://lmgtfy.com/?q={Uri.EscapeUriString(search)}").HideLinkPreview());
+            => ReplyAsync("Your special URL: ".Bold() + Helpers.BuildSafeUrl($"http://lmgtfy.com/?q={Uri.EscapeDataString(search)}").HideLinkPreview());
 
         [Command("urban", RunMode = RunMode.Async)]
         public async Task UrbanCmdAsync([Remainder] string query)
@@ -176,7 +176,7 @@ Awards: {item.Awards}";
         public async Task WikiCmdAsync([Remainder] string query)
         {
             using var client = new HttpClient();
-            var getResult = await client.GetAsync($"https://en.wikipedia.org/w/api.php?action=opensearch&search={ Uri.EscapeUriString(query)}").ConfigureAwait(false);
+            var getResult = await client.GetAsync($"https://en.wikipedia.org/w/api.php?action=opensearch&search={ Uri.EscapeDataString(query)}").ConfigureAwait(false);
 
             if (!getResult.IsSuccessStatusCode)
             {

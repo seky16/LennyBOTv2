@@ -64,7 +64,7 @@ namespace LennyBOTv2
             if (string.IsNullOrEmpty(text))
                 return string.Empty;
 
-            text = Uri.EscapeUriString(text);
+            text = Uri.EscapeDataString(text);
 
             return "<" + text + ">";
         }
@@ -76,7 +76,7 @@ namespace LennyBOTv2
             if (string.IsNullOrEmpty(text))
                 return string.Empty;
 
-            text = Uri.EscapeUriString(text);
+            text = Uri.EscapeDataString(text);
 
             return "<" + text + ">";
         }
@@ -89,7 +89,7 @@ namespace LennyBOTv2
             if (string.IsNullOrEmpty(url))
                 return text;
 
-            url = Uri.EscapeUriString(url);
+            url = Uri.EscapeDataString(url);
 
             return $"[{text}]({url})";
         }
@@ -103,7 +103,7 @@ namespace LennyBOTv2
             if (string.IsNullOrEmpty(urlStr))
                 return text;
 
-            urlStr = Uri.EscapeUriString(urlStr);
+            urlStr = Uri.EscapeDataString(urlStr);
 
             return $"[{text}]({urlStr})";
         }
