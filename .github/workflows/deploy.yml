@@ -35,6 +35,6 @@ jobs:
         username: ${{ secrets.USERNAME }}
         password: ${{ secrets.PASSWORD }}
         port: ${{ secrets.PORT }}
-        source: "./LennyBOTv3/bin/Release/net6.0/ubuntu.22.04-x64/publish/*"
-        target: "/home/seky16/LennyBOTv3"
+        source: "./LennyBOTv2/bin/Release/net6.0/ubuntu.22.04-x64/publish/*"
+        target: "/home/fatman/LennyBOTv2"
         strip_components: 6
